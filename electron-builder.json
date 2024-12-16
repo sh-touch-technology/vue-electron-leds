@@ -1,0 +1,38 @@
+{
+    "productName": "首环条屏设置",
+    "files": [
+        "./electron/main.js",
+        "./dist"
+    ],
+    "extraFiles": [
+        "./videos",
+        "./cvideo"
+    ],
+    "directories": {
+        "output": "./buileder"
+    },
+    "win":{
+        "target":[
+            {
+                "target":"nsis",
+                "arch":[
+                    "x64",
+                    "ia32"
+                ]
+            }
+        ],
+        "icon": "public/logo.png"
+    },
+    "linux": {
+        "target": [
+            {
+                "target": "deb",
+                "arch": [
+                    "arm64",
+                    "x64"
+                ]
+            }
+        ],
+        "icon": "public/logo.png"
+    }
+}
