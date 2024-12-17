@@ -14,7 +14,7 @@ export default defineConfig({
     vue(),
   ],
   server: {
-    port: 8888,
+    port: 8890,
     cors: true, // 允许跨域
     hmr: true, // 开启热更新
   },
@@ -26,7 +26,7 @@ export default defineConfig({
   css:{
     preprocessorOptions: {
       scss: {
-        additionalData: `@import "./src/style/scssConfig.scss";`
+        additionalData: `@use "./src/style/scssConfig.scss";`
       }
     }
   },

@@ -12,8 +12,10 @@ const env = 'dev';
 //日志目录
 const logFilePath = path.resolve(app.getPath('home'), '首环日志\\条屏设置');
 
+let mainWindow;
+
 //主窗口返回首页/重置页面
-function homeMainwindow() {
+function reloadMainwindow() {
     mainWindow.reload();
 }
 
@@ -80,18 +82,6 @@ function createMainWindowView() {
         },
     });
 
-    if (env == 'dev') {
-        console.log('dev模式');
-        mainWindow.setSize(1340, 1080);
-        contentwindow.setBounds({ x: 0, y: 0, width: 1340, height: 1080 });
-    }
-    else {
-        mainWindow.maximize();
-        mainWindow.setFullScreen(true);
-        mainWindow.setMenuBarVisibility(false);
-        mainWindow.setAutoHideMenuBar(true);
-    }
-
     // 配置热更新
     if (env == 'dev') {
         //开发环境
@@ -99,7 +89,7 @@ function createMainWindowView() {
         require('electron-reload')('../', {
             electron: require(elePath),
         });
-        mainWindow.loadURL('http://localhost:8888');
+        mainWindow.loadURL('http://localhost:8890');
         mainWindow.webContents.openDevTools();
     } else {
         //生产环境中要加载文件，打包的版本
@@ -135,11 +125,6 @@ function printLog(message) {
 
 // 导出所有函数
 module.exports = {
-    createMainWindowView, createMenuBarView, createTimeCounterView, createNoticeView, createErrorView,
-    getRegisterState, saveRegisterInfo, getPrintState, clearPageCache, getPageCache,
-    savePageCache, saveConfig, printPdf, startCameraService, updateMenu, printLog,
-    readConfigFile, getConfig, updateLastRunTime, clearPrintQueue, varifyRegisterInfo,
-    registeCheck, getRegisterInfo, initLog, initStore, openDialog, openMainwindowDevTools,
-    maximizeMainwindow, minimizeMainwindow, exitMainwindow, settingButtonClick, reloadMainwindow, homeMainwindow,
-    backMainwindow, forwardMainwindow, nircmd, showNotice, closeNotice, closeWebError
+    createMainWindowView, printLog, initLog, openDialog, openMainwindowDevTools,
+    maximizeMainwindow, minimizeMainwindow, exitMainwindow, reloadMainwindow
 };

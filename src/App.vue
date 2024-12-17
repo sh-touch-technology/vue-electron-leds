@@ -6,7 +6,6 @@
 </template>
 
 <script>
-import './assets/main.css'
 export default {
   components: {
   },
