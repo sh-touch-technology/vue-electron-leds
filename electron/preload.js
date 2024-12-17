@@ -1,10 +1,18 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electron', {
-    // 监听主进程的消息并暴露给渲染进程
-    onExitClick: (callback) => {
-        ipcRenderer.on('exit-click', (event, message) => {
-            callback(message);  // 将消息传递给渲染进程的回调函数
+
+    // 监听串口调用回传状态
+    onSerialState: (callback) => {
+        ipcRenderer.on('serial-state', (event, state) => {
+            callback(state);
+        });
+    },
+
+    // 监听串口监听消息
+    onSerialData: (callback) => {
+        ipcRenderer.on('serial-data', (event, data) => {
+            callback(data);
         });
     },
 
@@ -32,6 +40,9 @@ contextBridge.exposeInMainWorld('electron', {
     // 刷新窗口
     reloadWindow: () => ipcRenderer.send('window-reload'),
 
+    // 固定窗口在最前
+    toggleWindow: () => ipcRenderer.send('toggle-window'),
+
     // 获取版本号
-    getAppVersion: () => ipcRenderer.send('get-app-version')
+    getAppVersion: () => ipcRenderer.invoke('get-app-version')
 });

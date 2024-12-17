@@ -21,16 +21,11 @@ function reloadMainwindow() {
 
 //主窗口最大化/缩小
 function maximizeMainwindow() {
-    mainWindow.setFullScreen(false);
     if (mainWindow.isMaximized()) {
         mainWindow.unmaximize();
-        mainWindow.setSize(1340, 1080);
     }
     else {
         mainWindow.maximize();
-        mainWindow.setFullScreen(true);
-        mainWindow.setMenuBarVisibility(false);
-        mainWindow.setAutoHideMenuBar(true);
     }
 }
 
@@ -67,8 +62,8 @@ function exitMainwindow() {
 function createMainWindowView() {
 
     mainWindow = new BrowserWindow({
-        width: 1200,
-        height: 800,
+        width: 800,
+        height: 600,
         x: 0,
         y: 0,
         frame: false, // 去掉窗口边框

@@ -1,21 +1,33 @@
 <template>
-  <router-view></router-view>
-  <div v-if="$route.matched.length === 0">
-    <h1>404 - 页面未找到</h1>
+  <div class="conatiner">
+    <div class="toolbar">
+      <toolbar />
+    </div>
+    <div class="main"><router-view></router-view>
+      <div v-if="$route.matched.length === 0">
+        <h1>404 - 页面未找到</h1>
+      </div>
+    </div>
   </div>
 </template>
 
-<script>
-export default {
-  components: {
-  },
-  data() {
-    return {
-
-    }
-  },
-  methods: {
-
-  }
-}
+<script setup>
+import toolbar from './components/toolbar.vue'
 </script>
+
+<style scoped>
+.conatiner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.toolbar{
+
+}
+
+.main{
+  flex: 1;
+}
+
+</style>

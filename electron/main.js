@@ -18,12 +18,12 @@ function createWindow() {
     mainWindow = createMainWindowView();
 
     //打开串口
-    ipcMain.on('serial-open-port', (com) => {
+    ipcMain.on('serial-open-port', (event, com) => {
         openSerialPort(com, mainWindow);
     });
 
     //发送串口消息
-    ipcMain.on('serial-send-message', (message) => {
+    ipcMain.on('serial-send-message', (event, message) => {
         sendSerialPortMessage(message, mainWindow);
     });
 
@@ -56,6 +56,12 @@ function createWindow() {
     //渲染进程调用页面刷新
     ipcMain.on('window-reload', () => {
         reloadMainwindow();
+    });
+
+    //设置最前端 
+    ipcMain.on('toggle-window', () => {
+        const isAlwaysOnTop = mainWindow.isAlwaysOnTop();
+        mainWindow.setAlwaysOnTop(!isAlwaysOnTop);
     });
 
     //获取版本号
