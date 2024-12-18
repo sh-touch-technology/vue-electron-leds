@@ -1,9 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
-const {
-    createMainWindowView, printLog, initLog, openDialog, openMainwindowDevTools,
-    maximizeMainwindow, minimizeMainwindow, exitMainwindow, reloadMainwindow
-} = require('./functions');
-const { openSerialPort, sendSerialPortMessage } = require('./serial');
+const { createMainWindowView, openDialog, openMainwindowDevTools, maximizeMainwindow, minimizeMainwindow, exitMainwindow, reloadMainwindow } = require('./functions');
+const { openSerialPort,releaseSerialPort, sendSerialPortMessage, getSerialPortList } = require('./serial');
+const { printLog, initLog } = require('./utils');
 
 initLog();
 
@@ -22,9 +20,20 @@ function createWindow() {
         openSerialPort(com, mainWindow);
     });
 
+    //释放串口
+    ipcMain.on('serial-release-port', () => {
+        releaseSerialPort(mainWindow);
+    });
+
     //发送串口消息
     ipcMain.on('serial-send-message', (event, message) => {
         sendSerialPortMessage(message, mainWindow);
+    });
+
+    //获取串口列表
+    ipcMain.on('serial-get-port-list', () => {
+        console.log('serial-get-port-list');
+        getSerialPortList(mainWindow);
     });
 
     //渲染进程调用应用程序重启

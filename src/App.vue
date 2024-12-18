@@ -12,7 +12,8 @@
 </template>
 
 <script setup>
-import toolbar from './components/toolbar.vue'
+import toolbar from './components/toolbar.vue';
+import { ref } from 'vue'
 </script>
 
 <style scoped>
@@ -22,12 +23,10 @@ import toolbar from './components/toolbar.vue'
   display: flex;
   flex-direction: column;
 }
-.toolbar{
 
-}
+.toolbar {}
 
-.main{
+.main {
   flex: 1;
 }
-
 </style>

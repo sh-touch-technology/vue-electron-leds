@@ -2,22 +2,38 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electron', {
 
-    // 监听串口调用回传状态
+    // 监听串口相关函数调用回传状态
     onSerialState: (callback) => {
         ipcRenderer.on('serial-state', (event, state) => {
+            console.log('serial-state');
             callback(state);
         });
     },
 
-    // 监听串口监听消息
+    // 监听串口相关函数调用数据回传
     onSerialData: (callback) => {
-        ipcRenderer.on('serial-data', (event, data) => {
+        ipcRenderer.on('serial-data', (event, obj) => {
+            console.log('serial-data');
+            callback(obj);
+        });
+    },
+
+    // 监听串口接收消息
+    onSerialMessage: (callback) => {
+        ipcRenderer.on('serial-message', (event, data) => {
+            console.log('serial-message');
             callback(data);
         });
     },
 
+    //获取串口列表
+    getSerialPortList: () => ipcRenderer.send('serial-get-port-list'),
+
     //打开串口
     openSerialPort: (com) => ipcRenderer.send('serial-open-port', com),
+
+    //释放串口
+    releaseSerialPort: () => ipcRenderer.send('serial-release-port'),
 
     //发送串口消息
     sendSerialPortMessage: (msg) => ipcRenderer.send('serial-send-message', msg),

@@ -1,6 +1,6 @@
 const { app, BrowserWindow, BrowserView, Menu, dialog, session } = require('electron');
 const path = require('path');
-const log = require('electron-log/main');
+
 //const os = require('os');
 
 //发布时改为非dev的值
@@ -8,9 +8,6 @@ const env = 'dev';
 
 //运行平台win32/linux
 //const platform = os.platform();
-
-//日志目录
-const logFilePath = path.resolve(app.getPath('home'), '首环日志\\条屏设置');
 
 let mainWindow;
 
@@ -103,23 +100,8 @@ function createMainWindowView() {
     return mainWindow;
 }
 
-//初始化日志
-function initLog() {
-    log.transports.file.format = '[{y}-{m}-{d} {h}:{i}:{s}.{ms}] [{level}]{scope} {text}'
-    let date = new Date();
-    date = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-    //log.transports.file.resolvePath = () => platform === 'win32' ? ('C:\\shkj-log\\shkj-client\\' + date + '.txt') : ('~/shkj/log/shkj-client/' + date + '.txt');
-    log.transports.file.resolvePathFn = () => path.resolve(logFilePath, `${date}.txt`);
-    console.log('log file path:', path.resolve(logFilePath, `${date}.txt`));
-}
-
-//日志函数
-function printLog(message) {
-    log.info(message);
-}
-
 // 导出所有函数
 module.exports = {
-    createMainWindowView, printLog, initLog, openDialog, openMainwindowDevTools,
+    createMainWindowView, openDialog, openMainwindowDevTools,
     maximizeMainwindow, minimizeMainwindow, exitMainwindow, reloadMainwindow
 };
