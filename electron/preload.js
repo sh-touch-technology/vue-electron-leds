@@ -2,28 +2,34 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electron', {
 
-    // 监听串口相关函数调用回传状态
+    // 监听串口状态
     onSerialState: (callback) => {
-        ipcRenderer.on('serial-state', (event, state) => {
+        const listener = (event, state) => {
             console.log('serial-state');
             callback(state);
-        });
+        };
+        ipcRenderer.on('serial-state', listener);
+        return () => ipcRenderer.removeListener('serial-state', listener); // 返回移除方法
     },
 
-    // 监听串口相关函数调用数据回传
+    // 监听串口数据
     onSerialData: (callback) => {
-        ipcRenderer.on('serial-data', (event, obj) => {
+        const listener = (event, obj) => {
             console.log('serial-data');
             callback(obj);
-        });
+        };
+        ipcRenderer.on('serial-data', listener);
+        return () => ipcRenderer.removeListener('serial-data', listener); // 返回移除方法
     },
 
-    // 监听串口接收消息
+    // 监听串口消息
     onSerialMessage: (callback) => {
-        ipcRenderer.on('serial-message', (event, data) => {
+        const listener = (event, data) => {
             console.log('serial-message');
             callback(data);
-        });
+        };
+        ipcRenderer.on('serial-message', listener);
+        return () => ipcRenderer.removeListener('serial-message', listener); // 返回移除方法
     },
 
     //获取串口列表
@@ -36,7 +42,7 @@ contextBridge.exposeInMainWorld('electron', {
     releaseSerialPort: () => ipcRenderer.send('serial-release-port'),
 
     //发送串口消息
-    sendSerialPortMessage: (msg) => ipcRenderer.send('serial-send-message', msg),
+    sendSerialPortMessage: (dataArray) => ipcRenderer.send('serial-send-message', dataArray),
 
     //弹出electron提示const { title, msg } = obj;
     clientDialog: (obj) => ipcRenderer.send('client-dialog', obj),

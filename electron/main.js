@@ -26,8 +26,8 @@ function createWindow() {
     });
 
     //发送串口消息
-    ipcMain.on('serial-send-message', (event, message) => {
-        sendSerialPortMessage(message, mainWindow);
+    ipcMain.on('serial-send-message', (event, dataArray) => {
+        sendSerialPortMessage(dataArray, mainWindow);
     });
 
     //获取串口列表

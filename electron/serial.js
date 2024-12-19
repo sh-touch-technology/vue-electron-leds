@@ -68,22 +68,24 @@ function releaseSerialPort(view) {
 }
 
 // 5. 发送数据到串口
-function sendSerialPortMessage(message, view) {
+function sendSerialPortMessage(dataArray, view) {
     if (!port || !port.isOpen) {
         logs && console.error('串口未打开，无法发送数据');
         view.webContents.send('serial-state', { flag: 'error', msg: '串口未打开，无法发送数据' });
         return;
     }
 
-    port.write(message + '\r\n', err => {
+    const byteData = Buffer.from(dataArray);
+
+    port.write(byteData, err => {
         if (err) {
             printLog(`[串口发送]发送失败:${err.message}`);
             logs && console.error('发送失败:', err.message);
             view.webContents.send('serial-state', { flag: 'error', msg: '发送失败:' + err.message });
         }
-        printLog(`[串口发送]${message}`);
-        logs && console.log('已发送:', message);
-        view.webContents.send('serial-state', { flag: 'success', msg: '已发送:' + message });
+        printLog(`[串口发送]${dataArray}`);
+        logs && console.log('已发送:', dataArray);
+        view.webContents.send('serial-state', { flag: 'success', msg: '已发送:' + dataArray });
     });
 }
 
