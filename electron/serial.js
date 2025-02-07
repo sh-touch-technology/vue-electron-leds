@@ -11,7 +11,7 @@ function openSerialPort(com, view) {
     // 确保传递的是一个有效的串口路径
     if (typeof com !== 'string' || com.trim() === '') {
         logs && console.error('串口路径无效');
-        printLog(`[打开串口]错误:指定的串口名称无效,port:${com}`);
+        printLog(`[打开串口]错误：指定的串口名称无效,port:${com}`);
         view.webContents.send('serial-state', { flag: 'error', msg: '指定的串口名称无效' });
         return;
     }
@@ -23,7 +23,8 @@ function openSerialPort(com, view) {
     // 3. 打开串口
     port.open(err => {
         if (err) {
-            printLog(`[打开串口]错误:串口打开失败:${err.message}`);
+            printLog(`[打开串口]错误：串口打开失败:${err.message}`);
+            view.webContents.send('serial-state', { flag: 'error', msg: '串口打开失败：' + err.message });
             return logs && console.error('打开串口失败:', err.message);
         }
         printLog(`[打开串口]port:${com}`);
@@ -41,8 +42,8 @@ function openSerialPort(com, view) {
     // 6. 错误处理
     port.on('error', err => {
         printLog(`[串口错误]${err.message}`);
-        logs && console.error('串口错误:', err.message);
-        view.webContents.send('serial-state', { flag: 'error', msg: '串口错误:' + err.message });
+        logs && console.error('串口错误：', err.message);
+        view.webContents.send('serial-state', { flag: 'error', msg: '串口错误：' + err.message });
     });
 }
 
@@ -50,9 +51,9 @@ function releaseSerialPort(view) {
     if (port && port.isOpen) {
         port.close(err => {
             if (err) {
-                printLog(`[串口释放]释放串口失败:${err.message}`);
-                logs && console.error('释放串口失败:', err.message);
-                view.webContents.send('serial-state', { flag: 'error', msg: '释放串口失败:' + err.message });
+                printLog(`[串口释放]释放串口失败：${err.message}`);
+                logs && console.error('释放串口失败：', err.message);
+                view.webContents.send('serial-state', { flag: 'error', msg: '释放串口失败：' + err.message });
             } else {
                 port = null;
                 printLog(`[串口释放]串口已释放`);
@@ -79,13 +80,13 @@ function sendSerialPortMessage(dataArray, view) {
 
     port.write(byteData, err => {
         if (err) {
-            printLog(`[串口发送]发送失败:${err.message}`);
-            logs && console.error('发送失败:', err.message);
-            view.webContents.send('serial-state', { flag: 'error', msg: '发送失败:' + err.message });
+            printLog(`[串口发送]发送失败：${err.message}`);
+            logs && console.error('发送失败：', err.message);
+            view.webContents.send('serial-state', { flag: 'error', msg: '发送失败：' + err.message });
         }
         printLog(`[串口发送]${dataArray}`);
         logs && console.log('已发送:', dataArray);
-        view.webContents.send('serial-state', { flag: 'success', msg: '已发送:' + dataArray });
+        view.webContents.send('serial-state', { flag: 'success', msg: '已发送：' + dataArray + `(${dataArray.map(num => num.toString(16).padStart(2, '0').toUpperCase()).join(' ')})` });
     });
 }
 
@@ -108,9 +109,9 @@ async function getSerialPortList(view) {
             view.webContents.send('serial-data', { type: 'com_port_list', data: port_list });
         }
     } catch (error) {
-        printLog(`[获取串口列表]错误:${error}`);
-        logs && console.error('获取串口列表时出错:', error);
-        view.webContents.send('serial-state', { flag: 'error', msg: '串口列表获取失败:' + error });
+        printLog(`[获取串口列表]错误：${error}`);
+        logs && console.error('获取串口列表时出错：', error);
+        view.webContents.send('serial-state', { flag: 'error', msg: '串口列表获取失败：' + error });
     }
 }
 

@@ -2,9 +2,10 @@
     <div class="common-layout">
         <el-container class="main-container" :style="{ width: leftWidth + 'px' }">
             <el-header class="head">
-                <div class="groupbox" data-title="串口设置">
-                    <div class="groupbox-content">
-                        <el-select v-model="com_port_selected" clearable placeholder="请选择监听串口"
+                <!-- 串口设置 -->
+                <div class="groupbox" data-title="串口设置" style="flex: 1;">
+                    <div class="groupbox-content row">
+                        <el-select v-model="com_port_selected" filterable placeholder="请选择监听串口"
                             style="min-width: 220px;flex: 1;" :popper-options="{
                                 modifiers: [
                                     {
@@ -21,22 +22,23 @@
                                 </span>
                             </el-option>
                             <template #label>
-                                <span>串口监听：{{ com_port_selected }}</span>
+                                <span>串口选择：{{ com_port_selected }}</span>
                             </template>
                         </el-select>
-                        <div class="button-area">
+                        <div class="button-area nowrap">
                             <el-button type="primary" plain @click="getSerialPortList">刷新列表</el-button>
                             <el-button :type="com_state ? 'danger' : 'primary'" plain @click="openSerialPort">{{ com_state ?
-                                '释放' : '打开' }}
+                                '释放串口' + com_port_selected : '打开串口' }}
                             </el-button>
                         </div>
                         <!-- <el-button type="primary" plain @click="sendSerialPortMessage">发送</el-button> -->
                     </div>
                 </div>
-                <div class="groupbox" data-title="信道设置">
-                    <div class="groupbox-content">
-                        <el-select v-model="com_channel_selected" clearable style="min-width: 150px;flex: 1;"
-                            :popper-options="{
+                <!-- 屏号选择 -->
+                <div class="groupbox" data-title="选择修改屏号">
+                    <div class="groupbox-content row">
+                        <el-select v-model="screen_selected" filterable placeholder="请选择修改屏号"
+                            style="min-width: 200px;flex: 1;" :popper-options="{
                                 modifiers: [
                                     {
                                         name: 'computeStyles',
@@ -44,24 +46,95 @@
                                     },
                                 ],
                             }">
-                            <el-option v-for="item in channelDefined" :key="item.channel"
-                                :label="`${item.label}(${item.channel})`" :value="item.channel">
-                                <span style="float: left">{{ `${item.label}(${item.channel})` }}</span>
+                            <el-option v-for="screen in Array.from({ length: 256 }, (_, i) => i)" :key="screen"
+                                :label="screen" :value="screen"
+                                style="display: flex;flex-direction: row;justify-content: space-between;">
+                                <span style="">{{ screen }}</span>
                             </el-option>
                             <template #label>
-                                <span>信道：{{ `${channelDefined[com_channel_selected].label}(${com_channel_selected})`
-                                }}</span>
+                                <span>屏号选择：{{ screen_selected }}</span>
                             </template>
                         </el-select>
-                        <div class="button-area">
-                            <el-button type="primary" plain>主控读取</el-button>
-                            <el-button type="primary" plain>主控修改</el-button>
-                            <el-button type="primary" plain>无线控制卡</el-button>
-                        </div>
+                        <!-- <el-button type="primary" plain @click="sendSerialPortMessage">发送</el-button> -->
                     </div>
                 </div>
             </el-header>
-            <el-main class="main">Main
+            <el-main class="main">
+                <div class="setting">
+                    <!-- 基本设置 -->
+                    <div class="groupbox" data-title="基本设置" style="flex:1;">
+                        <div class="groupbox-content column">
+                            <!-- 修改屏号 -->
+                            <el-select v-model="screen_modify" filterable style="flex: 1;" :popper-options="{
+                                modifiers: [
+                                    {
+                                        name: 'computeStyles',
+                                        options: { gpuAcceleration: false, adaptive: false },
+                                    },
+                                ],
+                            }">
+                                <el-option v-for="screen in Array.from({ length: 256 }, (_, i) => i)" :key="screen"
+                                    :label="screen" :value="screen"
+                                    style="display: flex;flex-direction: row;justify-content: space-between;">
+                                    <span style="">{{ screen }}</span>
+                                </el-option>
+                                <template #label>
+                                    <span>修改屏号：{{ screen_modify }}</span>
+                                </template>
+                            </el-select>
+                            <!-- 行数 -->
+                            <el-select v-model="line_num" filterable style="flex: 1;" :popper-options="{
+                                modifiers: [
+                                    {
+                                        name: 'computeStyles',
+                                        options: { gpuAcceleration: false, adaptive: false },
+                                    },
+                                ],
+                            }">
+                                <el-option :key="1" :label="1" :value="1" style="display: flex;flex-direction: row;justify-content: space-between;">
+                                    <span style="">1</span>
+                                </el-option>
+                                <el-option :key="2" :label="2" :value="2" style="display: flex;flex-direction: row;justify-content: space-between;">
+                                    <span style="">2</span>
+                                </el-option>
+                                <template #label>
+                                    <span>行数：{{ line_num }}</span>
+                                </template>
+                            </el-select>
+                            <div class="button-area wrap">
+                                <el-button type="primary" plain>修改设置</el-button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 信道设置 -->
+                    <div class="groupbox" data-title="无线信道" style="flex:1;">
+                        <div class="groupbox-content column">
+                            <el-select v-model="com_channel_selected" filterable style="min-width: 150px;flex: 1;"
+                                :popper-options="{
+                                    modifiers: [
+                                        {
+                                            name: 'computeStyles',
+                                            options: { gpuAcceleration: false, adaptive: false },
+                                        },
+                                    ],
+                                }">
+                                <el-option v-for="item in channelDefined" :key="item.channel"
+                                    :label="`${item.label}(${item.channel})`" :value="item.channel">
+                                    <span style="float: left">{{ `${item.label}(${item.channel})` }}</span>
+                                </el-option>
+                                <template #label>
+                                    <span>信道选择：{{ `${channelDefined[com_channel_selected].label}(${com_channel_selected})`
+                                    }}</span>
+                                </template>
+                            </el-select>
+                            <div class="button-area wrap">
+                                <el-button type="primary" plain>主控读取</el-button>
+                                <el-button type="primary" plain>主控修改</el-button>
+                                <el-button type="primary" plain>无线控制卡</el-button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <el-button type="primary" plain @click="sendSerialPortMessage">测试发送</el-button>
             </el-main>
             <el-footer class="footer">Footer</el-footer>
@@ -73,11 +146,28 @@
 import { onMounted, onBeforeUnmount, ref } from 'vue';
 import { channelDefined } from './channel';
 
+//串口列表
 const com_port_list = ref([]);
+//当前选择串口
 const com_port_selected = ref('');
+//串口监听状态
 const com_state = ref(false);
 
+//修改屏号
+const screen_modify = ref(255);
+//行数
+const line_num = ref(1);
+//每行汉字数
+const line_text_num = ref(8);
+//数据正反向
+const data_forward_or_reverse_direction = ref(true);
+//OE极性
+const oe_polarity = ref(false);
+
+//当前选择信道
 const com_channel_selected = ref('');
+//当前选择屏号
+const screen_selected = ref(255);
 
 const getSerialPortList = () => {
     window.electron.getSerialPortList();
@@ -148,30 +238,39 @@ onBeforeUnmount(() => {
     height: 100%;
     display: flex;
     flex-direction: row;
+    padding: 15px 10px;
 
     .main-container {
         .head {
-            padding: 0;
             height: auto;
             display: flex;
             min-width: 510px;
+            padding: 0;
 
-            padding: 15px 10px;
+            flex-direction: row;
+            gap: 10px;
 
-            @media (max-width: 950px) {
-                flex-direction: column;
-                gap: 15px;
-            }
+            // @media (max-width: 950px) {
+            //     flex-direction: column;
+            //     gap: 15px;
+            // }
 
-            @media (min-width: 950px) {
-                flex-direction: row;
-                gap: 10px;
-            }
+            // @media (min-width: 950px) {
+            //     flex-direction: row;
+            //     gap: 10px;
+            // }
         }
 
         .main {
             flex: 1;
-            padding: 0;
+            padding: 15px 0 0 0;
+
+            .setting {
+                flex: 1;
+                display: flex;
+                flex-direction: row;
+                gap: 10px;
+            }
         }
 
         .footer {
@@ -186,18 +285,36 @@ onBeforeUnmount(() => {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 3.5px;
-    flex: 1;
 
     .groupbox-content {
         padding-top: 5px;
         display: flex;
-        flex-direction: row;
 
-        .button-area {
+        .button-area.wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .button-area.wrap>* {
+            flex: 1;
+            margin: 0;
+        }
+
+        .button-area.nowrap {
             display: flex;
             flex-wrap: nowrap;
             margin-left: 12px;
         }
+    }
+
+    .groupbox-content.row {
+        flex-direction: row;
+    }
+
+    .groupbox-content.column {
+        flex-direction: column;
+        gap: 10px;
     }
 }
 
