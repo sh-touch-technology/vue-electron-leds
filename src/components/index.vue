@@ -6,15 +6,9 @@
                 <div class="groupbox" data-title="串口设置" style="flex: 1;">
                     <div class="groupbox-content row">
                         <el-select v-model="com_port_selected" filterable placeholder="请选择监听串口"
-                            style="min-width: 220px;flex: 1;" :popper-options="{
-                                modifiers: [
-                                    {
-                                        name: 'computeStyles',
-                                        options: { gpuAcceleration: false, adaptive: false },
-                                    },
-                                ],
-                            }">
-                            <el-option v-for="item in com_port_list" :key="item.port" :label="item.port" :value="item.port"
+                            style="min-width: 220px;flex: 1;" :popper-options="popper_options">
+                            <el-option v-for="item in com_port_list" :key="item.port" :label="item.port"
+                                :value="item.port"
                                 style="display: flex;flex-direction: row;justify-content: space-between;">
                                 <span style="">{{ item.port }}</span>
                                 <span style="color: var(--el-text-color-secondary);font-size: 12px;">
@@ -27,8 +21,8 @@
                         </el-select>
                         <div class="button-area nowrap">
                             <el-button type="primary" plain @click="getSerialPortList">刷新列表</el-button>
-                            <el-button :type="com_state ? 'danger' : 'primary'" plain @click="openSerialPort">{{ com_state ?
-                                '释放串口' + com_port_selected : '打开串口' }}
+                            <el-button :type="com_state ? 'danger' : 'primary'" plain
+                                @click="openSerialPort">{{ com_state ? '释放串口' + com_port_selected : '打开串口' }}
                             </el-button>
                         </div>
                         <!-- <el-button type="primary" plain @click="sendSerialPortMessage">发送</el-button> -->
@@ -38,14 +32,7 @@
                 <div class="groupbox" data-title="选择修改屏号">
                     <div class="groupbox-content row">
                         <el-select v-model="screen_selected" filterable placeholder="请选择修改屏号"
-                            style="min-width: 200px;flex: 1;" :popper-options="{
-                                modifiers: [
-                                    {
-                                        name: 'computeStyles',
-                                        options: { gpuAcceleration: false, adaptive: false },
-                                    },
-                                ],
-                            }">
+                            style="min-width: 200px;flex: 1;" :popper-options="popper_options">
                             <el-option v-for="screen in Array.from({ length: 256 }, (_, i) => i)" :key="screen"
                                 :label="screen" :value="screen"
                                 style="display: flex;flex-direction: row;justify-content: space-between;">
@@ -65,17 +52,10 @@
                     <div class="groupbox" data-title="基本设置" style="flex:1;">
                         <div class="groupbox-content column">
                             <!-- 修改屏号 -->
-                            <el-select v-model="screen_modify" filterable style="flex: 1;" :popper-options="{
-                                modifiers: [
-                                    {
-                                        name: 'computeStyles',
-                                        options: { gpuAcceleration: false, adaptive: false },
-                                    },
-                                ],
-                            }">
+                            <el-select v-model="screen_modify" filterable style="flex: 1;"
+                                :popper-options="popper_options">
                                 <el-option v-for="screen in Array.from({ length: 256 }, (_, i) => i)" :key="screen"
-                                    :label="screen" :value="screen"
-                                    style="display: flex;flex-direction: row;justify-content: space-between;">
+                                    :label="screen" :value="screen">
                                     <span style="">{{ screen }}</span>
                                 </el-option>
                                 <template #label>
@@ -83,22 +63,65 @@
                                 </template>
                             </el-select>
                             <!-- 行数 -->
-                            <el-select v-model="line_num" filterable style="flex: 1;" :popper-options="{
-                                modifiers: [
-                                    {
-                                        name: 'computeStyles',
-                                        options: { gpuAcceleration: false, adaptive: false },
-                                    },
-                                ],
-                            }">
-                                <el-option :key="1" :label="1" :value="1" style="display: flex;flex-direction: row;justify-content: space-between;">
+                            <el-select v-model="line_num" filterable style="flex: 1;" :popper-options="popper_options">
+                                <el-option :key="1" :label="1" :value="1">
                                     <span style="">1</span>
                                 </el-option>
-                                <el-option :key="2" :label="2" :value="2" style="display: flex;flex-direction: row;justify-content: space-between;">
+                                <el-option :key="2" :label="2" :value="2">
                                     <span style="">2</span>
                                 </el-option>
                                 <template #label>
                                     <span>行数：{{ line_num }}</span>
+                                </template>
+                            </el-select>
+                            <!-- 每行汉字数 -->
+                            <el-select v-model="line_text_num" filterable style="flex: 1;"
+                                :popper-options="popper_options">
+                                <el-option v-for="item in Array.from({ length: 33 }, (_, i) => i)" :key="item"
+                                    :label="item" :value="item">
+                                    <span style="">{{ item }}</span>
+                                </el-option>
+                                <template #label>
+                                    <span>每行汉字数：{{ line_text_num }}</span>
+                                </template>
+                            </el-select>
+                            <!-- 数据正反向 -->
+                            <el-select v-model="data_forward_or_reverse_direction" style="flex: 1;" :popper-options="popper_options">
+                                <el-option :key="1" :label="'正向'" :value="true">
+                                    <span style="">正向</span>
+                                </el-option>
+                                <el-option :key="2" :label="'反向'" :value="false">
+                                    <span style="">反向</span>
+                                </el-option>
+                                <template #label>
+                                    <span>数据正反向：{{ data_forward_or_reverse_direction ? '正向' : '反向' }}</span>
+                                </template>
+                            </el-select>
+                            <!-- OE极性 -->
+                            <el-select v-model="oe_polarity" style="flex: 1;" :popper-options="popper_options">
+                                <el-option :key="1" :label="'正向'" :value="true">
+                                    <span style="">正向</span>
+                                </el-option>
+                                <el-option :key="2" :label="'反向'" :value="false">
+                                    <span style="">反向</span>
+                                </el-option>
+                                <template #label>
+                                    <span>OE极性：{{ oe_polarity ? '正向' : '反向' }}</span>
+                                </template>
+                            </el-select>
+                            <!-- 点阵选择 -->
+                            <el-select v-model="dot_matrix" style="flex: 1;" :popper-options="popper_options">
+                                <el-option :key="16" :label="16" :value="16">
+                                    <span style="">16</span>
+                                </el-option>
+                                <el-option :key="24" :label="24" :value="24">
+                                    <span style="">24</span>
+                                </el-option>
+                                <el-option :key="32" :label="32" :value="32">
+                                    <span style="">32</span>
+                                </el-option>
+                                <template #label>
+                                    <span>点阵选择：{{ dot_matrix }}</span>
                                 </template>
                             </el-select>
                             <div class="button-area wrap">
@@ -106,25 +129,21 @@
                             </div>
                         </div>
                     </div>
+                    <!-- 初始显示内容设置 -->
+                    <div class="groupbox" data-title="初始显示内容设置" style="flex:1;">
+
+                    </div>
                     <!-- 信道设置 -->
                     <div class="groupbox" data-title="无线信道" style="flex:1;">
                         <div class="groupbox-content column">
                             <el-select v-model="com_channel_selected" filterable style="min-width: 150px;flex: 1;"
-                                :popper-options="{
-                                    modifiers: [
-                                        {
-                                            name: 'computeStyles',
-                                            options: { gpuAcceleration: false, adaptive: false },
-                                        },
-                                    ],
-                                }">
+                                :popper-options="popper_options">
                                 <el-option v-for="item in channelDefined" :key="item.channel"
                                     :label="`${item.label}(${item.channel})`" :value="item.channel">
                                     <span style="float: left">{{ `${item.label}(${item.channel})` }}</span>
                                 </el-option>
                                 <template #label>
-                                    <span>信道选择：{{ `${channelDefined[com_channel_selected].label}(${com_channel_selected})`
-                                    }}</span>
+                                    <span>信道选择：{{ `${channelDefined[com_channel_selected].label}(${com_channel_selected})` }}</span>
                                 </template>
                             </el-select>
                             <div class="button-area wrap">
@@ -146,6 +165,8 @@
 import { onMounted, onBeforeUnmount, ref } from 'vue';
 import { channelDefined } from './channel';
 
+const popper_options = ref({ modifiers: [{ name: 'computeStyles', options: { gpuAcceleration: false, adaptive: false }, },], });
+
 //串口列表
 const com_port_list = ref([]);
 //当前选择串口
@@ -163,6 +184,8 @@ const line_text_num = ref(8);
 const data_forward_or_reverse_direction = ref(true);
 //OE极性
 const oe_polarity = ref(false);
+//点阵选择
+const dot_matrix = ref(32);
 
 //当前选择信道
 const com_channel_selected = ref('');
