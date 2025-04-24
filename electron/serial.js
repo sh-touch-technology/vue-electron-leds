@@ -64,7 +64,7 @@ function releaseSerialPort(view) {
     } else {
         printLog(`[串口释放]串口未打开，无需释放`);
         logs && console.log('串口未打开');
-        view.webContents.send('serial-state', { flag: 'success', msg: '串口未打开，无需释放' });
+        view.webContents.send('serial-state', { flag: 'default', msg: '串口未打开，无需释放' });
     }
 }
 
@@ -86,7 +86,7 @@ function sendSerialPortMessage(dataArray, view) {
         }
         printLog(`[串口发送]${dataArray}`);
         logs && console.log('已发送:', dataArray);
-        view.webContents.send('serial-state', { flag: 'success', msg: '已发送：' + dataArray + `(${dataArray.map(num => num.toString(16).padStart(2, '0').toUpperCase()).join(' ')})` });
+        view.webContents.send('serial-state', { flag: 'primary', msg: '已发送：' + dataArray + `(${dataArray.map(num => num.toString(16).padStart(2, '0').toUpperCase()).join(' ')})` });
     });
 }
 
@@ -97,7 +97,7 @@ async function getSerialPortList(view) {
             printLog(`[获取串口列表]设备上没有可用的串口`);
             logs && console.log('没有找到可用的串口');
             view.webContents.send('serial-data', { type: 'com_port_list', data: [] });
-            view.webContents.send('serial-state', { flag: 'warning', msg: '设备上没有可用的串口' });
+            view.webContents.send('serial-state', { flag: 'warning', msg: '设备上没有可用的串口！' });
         } else {
             logs && console.log('可用的串口列表:');
             const port_list = [];

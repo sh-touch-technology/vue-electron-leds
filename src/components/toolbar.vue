@@ -95,7 +95,7 @@ const computeFixedStyle = computed(() => {
 }
 
 .button {
-    padding: 1vh 2vw;
+    padding: 7px 16px;
     -webkit-app-region: no-drag;
     display: flex;
     max-width: 20vw;

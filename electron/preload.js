@@ -5,7 +5,7 @@ contextBridge.exposeInMainWorld('electron', {
     // 监听串口状态
     onSerialState: (callback) => {
         const listener = (event, state) => {
-            console.log('serial-state');
+            //console.log('serial-state');
             callback(state);
         };
         ipcRenderer.on('serial-state', listener);
@@ -15,7 +15,7 @@ contextBridge.exposeInMainWorld('electron', {
     // 监听串口数据
     onSerialData: (callback) => {
         const listener = (event, obj) => {
-            console.log('serial-data');
+            //console.log('serial-data');
             callback(obj);
         };
         ipcRenderer.on('serial-data', listener);
