@@ -1,6 +1,7 @@
 const { app, BrowserWindow, BrowserView, Menu, dialog, session } = require('electron');
 const path = require('path');
-
+const Store = require('electron-store');
+const { printLog } = require('./utils');
 //const os = require('os');
 
 //发布时改为非dev的值
@@ -10,6 +11,58 @@ const env = 'dev';
 //const platform = os.platform();
 
 let mainWindow;
+//elctron-store存储实例
+let store;
+
+//初始化存储
+function initStore() {
+    page_store = new Store({
+        name: 'cache',
+        defaults: {
+        }
+    });
+
+    store = new Store({
+        name: 'config',
+        //encryptionKey: 'your-encryption-key', // 数据加密
+        defaults: {
+            com_port_selected: null, //选择的串口
+            screen_selected: 255, //选择修改的屏号
+            screen_edit: 255, //修改屏号
+            line_num: 1, //行数
+            line_text_num: 8, //每行汉字数
+            data_forward_or_reverse_direction: true, //数据正反向
+            oe_polarity: false, //OE极性
+            dot_matrix: 32, //点阵选择
+            com_channel_selected: null, //信道选择
+        }
+    });
+}
+
+//获取配置文件
+function getConfig() {
+    try {
+        const config = store.store;
+        printLog('配置文件读取成功');
+        return config;
+    }
+    catch (error) {
+        printLog('配置文件读取失败，错误：' + error);
+    }
+}
+
+//保存配置文件
+function saveConfig(data) {
+    try {
+        const config = JSON.parse(data);
+        store.store = config;
+        printLog('渲染进程保存配置信息成功');
+        return true;
+    } catch (error) {
+        printLog('渲染进程保存配置信息失败，错误：' + error);
+        return false;
+    }
+}
 
 //主窗口返回首页/重置页面
 function reloadMainwindow() {
@@ -59,8 +112,8 @@ function exitMainwindow() {
 function createMainWindowView() {
 
     mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 950,
+        height: 750,
         x: 0,
         y: 0,
         frame: false, // 去掉窗口边框
@@ -103,5 +156,6 @@ function createMainWindowView() {
 // 导出所有函数
 module.exports = {
     createMainWindowView, openDialog, openMainwindowDevTools,
-    maximizeMainwindow, minimizeMainwindow, exitMainwindow, reloadMainwindow
+    maximizeMainwindow, minimizeMainwindow, exitMainwindow, reloadMainwindow,
+    saveConfig, getConfig, initStore
 };

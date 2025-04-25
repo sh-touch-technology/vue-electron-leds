@@ -1,8 +1,11 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
-const { createMainWindowView, openDialog, openMainwindowDevTools, maximizeMainwindow, minimizeMainwindow, exitMainwindow, reloadMainwindow } = require('./functions');
-const { openSerialPort,releaseSerialPort, sendSerialPortMessage, getSerialPortList } = require('./serial');
+const { createMainWindowView, openDialog, openMainwindowDevTools,
+    maximizeMainwindow, minimizeMainwindow, exitMainwindow, reloadMainwindow,
+    getConfig, saveConfig, initStore } = require('./functions');
+const { openSerialPort, releaseSerialPort, sendSerialPortMessage, getSerialPortList } = require('./serial');
 const { printLog, initLog } = require('./utils');
 
+initStore();
 initLog();
 
 let mainWindow;
@@ -14,6 +17,16 @@ function createWindow() {
 
     //创建浏览器窗口
     mainWindow = createMainWindowView();
+
+    //渲染进程获取配置信息
+    ipcMain.handle('get-config-data', () => {
+        return getConfig();
+    });
+
+    //渲染进程保存配置
+    ipcMain.handle('save-config-data', (event, data) => {
+        return saveConfig(data);
+    });
 
     //打开串口
     ipcMain.on('serial-open-port', (event, com) => {
@@ -32,7 +45,6 @@ function createWindow() {
 
     //获取串口列表
     ipcMain.on('serial-get-port-list', () => {
-        console.log('serial-get-port-list');
         getSerialPortList(mainWindow);
     });
 

@@ -1,18 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electron', {
-
-    // 监听串口状态
-    onSerialState: (callback) => {
-        const listener = (event, state) => {
-            //console.log('serial-state');
-            callback(state);
-        };
-        ipcRenderer.on('serial-state', listener);
-        return () => ipcRenderer.removeListener('serial-state', listener); // 返回移除方法
-    },
-
-    // 监听串口数据
+    // 监听串口返回消息
     onSerialData: (callback) => {
         const listener = (event, obj) => {
             //console.log('serial-data');
@@ -22,15 +11,21 @@ contextBridge.exposeInMainWorld('electron', {
         return () => ipcRenderer.removeListener('serial-data', listener); // 返回移除方法
     },
 
-    // 监听串口消息
+    // 监听串口监听接收数据
     onSerialMessage: (callback) => {
         const listener = (event, data) => {
-            console.log('serial-message');
+            //console.log('serial-message');
             callback(data);
         };
         ipcRenderer.on('serial-message', listener);
         return () => ipcRenderer.removeListener('serial-message', listener); // 返回移除方法
     },
+
+    //获取配置数据
+    getConfigData: () => ipcRenderer.invoke('get-config-data'),
+
+    //保存配置
+    saveConfig: (data) => ipcRenderer.invoke('save-config-data', data),
 
     //获取串口列表
     getSerialPortList: () => ipcRenderer.send('serial-get-port-list'),

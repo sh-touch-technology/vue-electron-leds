@@ -1,43 +1,47 @@
 <template>
     <div class="common-layout">
-        <el-container class="main-container" :style="{ width: leftWidth + 'px' }">
+        <el-container class="main-container">
             <el-header class="head">
                 <!-- 串口设置 -->
                 <div class="groupbox" data-title="串口设置" style="flex: 2;">
                     <div class="groupbox-content row">
                         <el-select v-model="data.com_port_selected" filterable placeholder="请选择监听串口"
                             style="min-width: 220px;flex: 1;" :popper-options="popper_options">
-                            <el-option v-for="item in com_port_list" :key="item.port" :label="item.port" :value="item.port"
+                            <el-option v-for="item in com_port_list" :key="item.port" :label="item.port"
+                                :value="item.port"
                                 style="display: flex;flex-direction: row;justify-content: space-between;">
-                                <span style="">{{ item.port }}</span>
+                                <span style="">
+                                    {{ item.port }}
+                                </span>
                                 <span style="color: var(--el-text-color-secondary);font-size: 12px;">
                                     {{ item.name }}
                                 </span>
                             </el-option>
                             <template #label>
                                 <div style="display: flex;flex-direction: row;align-items: center;">
-                                    <span :style="computeSelectStyle(data.com_port_selected)">
-                                        串口选择：{{ data.com_port_selected }}
+                                    <span class="selector-selected" :style="computeSelectStyle(data.com_port_selected)">
+                                        <p class="selected-title">串口选择：</p>
+                                        <p class="selected-content">{{ data.com_port_selected }}</p>
                                     </span>
                                     <el-tag style="margin-left: auto;height: 20px;border-radius: 4px;"
-                                        :type="com_state ? 'success' : 'info'">{{ com_state
-                                            ? '监听中' : '未监听' }}</el-tag>
+                                        :type="com_state ? 'success' : 'info'">
+                                        {{ com_state ? '监听中' : '未监听' }}
+                                    </el-tag>
                                 </div>
                             </template>
                         </el-select>
                         <div class="button-area nowrap">
                             <el-button type="primary" plain @click="getSerialPortList">刷新列表</el-button>
-                            <el-button :type="com_state ? 'danger' : 'primary'" plain @click="openSerialPort">{{ com_state ?
-                                '释放串口' : '打开串口' }}
+                            <el-button :type="com_state ? 'danger' : 'primary'" plain @click="openSerialPort">
+                                {{ com_state ? '释放串口' : '打开串口' }}
                             </el-button>
                         </div>
-                        <!-- <el-button type="primary" plain @click="sendSerialPortMessage">发送</el-button> -->
                     </div>
                 </div>
                 <!-- 屏号选择 -->
-                <div class="groupbox" data-title="选择修改屏号" style="flex: 1;">
+                <div class="groupbox" data-title="选择屏号" style="flex: 1;">
                     <div class="groupbox-content row">
-                        <el-select v-model="data.screen_selected" filterable placeholder="请选择修改屏号"
+                        <el-select v-model="data.screen_selected" filterable placeholder="请选择屏号"
                             style="min-width: 200px;flex: 1;" :popper-options="popper_options">
                             <el-option v-for="screen in Array.from({ length: 256 }, (_, i) => i)" :key="screen"
                                 :label="screen" :value="screen"
@@ -45,11 +49,12 @@
                                 <span style="">{{ screen }}</span>
                             </el-option>
                             <template #label>
-                                <span :style="computeSelectStyle(data.screen_selected)">屏号选择：{{ data.screen_selected
-                                }}</span>
+                                <span class="selector-selected" :style="computeSelectStyle(data.screen_selected)">
+                                    <p class="selected-title">屏号选择：</p>
+                                    <p class="selected-content">{{ data.screen_selected }}</p>
+                                </span>
                             </template>
                         </el-select>
-                        <!-- <el-button type="primary" plain @click="sendSerialPortMessage">发送</el-button> -->
                     </div>
                 </div>
                 <div class="close">
@@ -63,8 +68,24 @@
                     <!-- 基本设置 -->
                     <div class="groupbox" data-title="基本设置" style="flex:1;">
                         <div class="groupbox-content column">
+                            <!-- 修改屏号 -->
+                            <el-select v-model="data.screen_edit" filterable placeholder="请选择修改屏号"
+                                style="min-width: 200px;flex: 1;" :popper-options="popper_options">
+                                <el-option v-for="screen in Array.from({ length: 256 }, (_, i) => i)" :key="screen"
+                                    :label="screen" :value="screen"
+                                    style="display: flex;flex-direction: row;justify-content: space-between;">
+                                    <span style="">{{ screen }}</span>
+                                </el-option>
+                                <template #label>
+                                    <span class="selector-selected" :style="computeSelectStyle(data.screen_edit)">
+                                        <p class="selected-title">修改屏号：</p>
+                                        <p class="selected-content">{{ data.screen_edit }}</p>
+                                    </span>
+                                </template>
+                            </el-select>
                             <!-- 行数 -->
-                            <el-select v-model="data.line_num" filterable style="flex: 1;" :popper-options="popper_options">
+                            <el-select v-model="data.line_num" filterable style="flex: 1;"
+                                :popper-options="popper_options">
                                 <el-option :key="1" :label="1" :value="1">
                                     <span style="">1</span>
                                 </el-option>
@@ -72,19 +93,24 @@
                                     <span style="">2</span>
                                 </el-option>
                                 <template #label>
-                                    <span :style="computeSelectStyle(data.line_num)">行数：{{ data.line_num }}</span>
+                                    <span class="selector-selected" :style="computeSelectStyle(data.line_num)">
+                                        <p class="selected-title">行数：</p>
+                                        <p class="selected-content">{{ data.line_num }}</p>
+                                    </span>
                                 </template>
                             </el-select>
                             <!-- 每行汉字数 -->
                             <el-select v-model="data.line_text_num" filterable style="flex: 1;"
                                 :popper-options="popper_options">
-                                <el-option v-for="item in Array.from({ length: 33 }, (_, i) => i)" :key="item" :label="item"
-                                    :value="item">
+                                <el-option v-for="item in Array.from({ length: 33 }, (_, i) => i)" :key="item"
+                                    :label="item" :value="item">
                                     <span style="">{{ item }}</span>
                                 </el-option>
                                 <template #label>
-                                    <span :style="computeSelectStyle(data.line_text_num)">每行汉字数：{{ data.line_text_num
-                                    }}</span>
+                                    <span class="selector-selected" :style="computeSelectStyle(data.line_text_num)">
+                                        <p class="selected-title">每行汉字数：</p>
+                                        <p class="selected-content">{{ data.line_text_num }}</p>
+                                    </span>
                                 </template>
                             </el-select>
                             <!-- 数据正反向 -->
@@ -97,8 +123,13 @@
                                     <span style="">反向</span>
                                 </el-option>
                                 <template #label>
-                                    <span :style="computeSelectStyle(data.data_forward_or_reverse_direction)">数据正反向：{{
-                                        data.data_forward_or_reverse_direction ? '正向' : '反向' }}</span>
+                                    <span class="selector-selected"
+                                        :style="computeSelectStyle(data.data_forward_or_reverse_direction)">
+                                        <p class="selected-title">数据正反向：</p>
+                                        <p class="selected-content">
+                                            {{ data.data_forward_or_reverse_direction ? '正向' : '反向' }}
+                                        </p>
+                                    </span>
                                 </template>
                             </el-select>
                             <!-- OE极性 -->
@@ -110,8 +141,10 @@
                                     <span style="">反向</span>
                                 </el-option>
                                 <template #label>
-                                    <span :style="computeSelectStyle(data.oe_polarity)">OE极性：{{ data.oe_polarity ? '正向' :
-                                        '反向' }}</span>
+                                    <span class="selector-selected" :style="computeSelectStyle(data.oe_polarity)">
+                                        <p class="selected-title">OE极性：</p>
+                                        <p class="selected-content">{{ data.oe_polarity ? '正向' : '反向' }}</p>
+                                    </span>
                                 </template>
                             </el-select>
                             <!-- 点阵选择 -->
@@ -126,7 +159,10 @@
                                     <span style="">32</span>
                                 </el-option>
                                 <template #label>
-                                    <span :style="computeSelectStyle(data.dot_matrix)">点阵选择：{{ data.dot_matrix }}</span>
+                                    <span class="selector-selected" :style="computeSelectStyle(data.dot_matrix)">
+                                        <p class="selected-title">点阵选择：</p>
+                                        <p class="selected-content">{{ data.dot_matrix }}</p>
+                                    </span>
                                 </template>
                             </el-select>
                             <div class="button-area wrap">
@@ -152,13 +188,17 @@
                                     <span style="float: left">{{ `${item.label}(${item.channel})` }}</span>
                                 </el-option>
                                 <template #label>
-                                    <span :style="computeSelectStyle(data.com_channel_selected)">信道选择：{{
-                                        `${channelDefined[data.com_channel_selected].label}(${data.com_channel_selected})`
-                                    }}</span>
+                                    <span class="selector-selected"
+                                        :style="computeSelectStyle(data.com_channel_selected)">
+                                        <p class="selected-title">信道选择：</p>
+                                        <p class="selected-content">
+                                            {{ `${channelDefined[data.com_channel_selected].label}(${data.com_channel_selected})` }}
+                                        </p>
+                                    </span>
                                 </template>
                             </el-select>
                             <div class="button-area wrap">
-                                <el-button type="primary" plain>主控读取</el-button>
+                                <el-button type="primary" plain @click="readMainControl()">主控读取</el-button>
                                 <el-button type="primary" plain>主控修改</el-button>
                                 <el-button type="primary" plain>无线控制卡</el-button>
                             </div>
@@ -189,9 +229,12 @@
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount, ref, nextTick } from 'vue';
+import { onMounted, onBeforeUnmount, ref, nextTick, toRefs } from 'vue';
 import { channelDefined } from './channel';
+import { ConfigDataStore } from '@pinia/ConfigData.js';
+import { getReadMainControlData } from './ledsUtil.js';
 
+const ConfigData = ConfigDataStore();
 //Popper.js配置
 const popper_options = ref({ modifiers: [{ name: 'computeStyles', options: { gpuAcceleration: false, adaptive: false }, },], });
 
@@ -203,16 +246,7 @@ const com_state = ref(false);
 const log_list = ref([]);
 
 //设置数据
-const data = ref({
-    com_port_selected: null, //选择的串口
-    screen_selected: 255, //选择修改的屏号
-    line_num: 1, //行数
-    line_text_num: 8, //每行汉字数
-    data_forward_or_reverse_direction: true, //数据正反向
-    oe_polarity: false, //OE极性
-    dot_matrix: 32, //点阵选择
-    com_channel_selected: null, //信道选择
-})
+const { config: data } = toRefs(ConfigData);
 
 //日志函数
 let log_id = 0;
@@ -253,9 +287,15 @@ const openSerialPort = () => {
 }
 
 //发送串口消息
-const sendSerialPortMessage = () => {
-    const data = [191, 195, 82, 50, 51, 26];
-    window.electron.sendSerialPortMessage(data);
+const sendSerialPortMessage = (frame) => {
+    window.electron.sendSerialPortMessage(frame);
+}
+
+//主控读取
+const readMainControl = () => {
+    console.log('data.value.com_channel_selected',data.value.com_channel_selected);
+    const frame = getReadMainControlData(data.value.com_channel_selected);
+    sendSerialPortMessage(frame);
 }
 
 //保存取消监听渲染进程消息的函数
@@ -299,42 +339,45 @@ const computeLogColor = (level) => {
 
 onMounted(() => {
     log('程序启动');
-    // 监听串口状态
-    cleanupFns.push(
-        window.electron.onSerialState((state) => {
-            console.log('收到串口状态', state);
-            log(state.msg, state.flag)
-        })
-    );
 
-    // 监听串口数据
+    // 监听串口返回消息
     cleanupFns.push(
         window.electron.onSerialData((obj) => {
-            console.log('串口收到消息', obj);
-            //接收到串口列表
-            if (obj.type === 'com_port_list') {
-                com_port_list.value = obj.data;
-                log(`串口列表获取成功 ${JSON.stringify(com_port_list.value.map(item => item.port))} ${com_port_list.value.length}个串口`, 'success');
-                //未选择串口的情况下，自动选择一个串口
-                if (com_port_list.value.length > 0 && !data.value.com_port_selected) {
-                    data.value.com_port_selected = com_port_list.value[0].port;
-                }
+            switch (obj.type) {
+                //接收到串口列表
+                case 'com_port_list':
+                    com_port_list.value = obj.data;
+                    log(`串口列表获取成功 ${JSON.stringify(com_port_list.value.map(item => item.port))} ${com_port_list.value.length}个串口`, 'success');
+                    //未选择串口的情况下，自动选择一个串口
+                    if (com_port_list.value.length > 0 && !data.value.com_port_selected) {
+                        data.value.com_port_selected = com_port_list.value[0].port;
+                    }
+                    break;
                 //接收到串口打开
-            } else if (obj.type === 'com-port-open') {
-                com_state.value = true;
-                log(`串口打开成功 ${data.value.com_port_selected}`, 'success');
-                //接收到串口释放成功
-            } else if (obj.type === 'com-port-release') {
-                com_state.value = false;
-                log(`串口释放`, 'primary');
+                case 'com-port-open':
+                    com_state.value = true;
+                    log(`串口打开成功 ${data.value.com_port_selected}`, 'success');
+                    break;
+                //接收到串口释放
+                case 'com-port-release':
+                    com_state.value = false;
+                    log(`串口释放`, 'primary');
+                    break;
+                //接收到串口状态消息
+                case 'com-state-message':
+                    log(obj.msg, obj.flag)
+                    break;
+                default:
+                    console.log('接收到渲染进程发送的串口未注册消息', obj);
+                    break;
             }
         })
     );
 
-    // 监听串口消息
+    // 监听串口监听接收数据
     cleanupFns.push(
         window.electron.onSerialMessage((data) => {
-            console.log('串口收到消息', data);
+            log(`串口接收：${data.join(' ')} hex(${data.map(num => num.toString(16).padStart(2, '0').toUpperCase()).join(' ')})`, 'default')
         })
     );
     getSerialPortList();
@@ -442,14 +485,15 @@ onBeforeUnmount(() => {
                     display: flex;
                     flex-direction: column;
                     overflow-y: auto;
-                    max-height: 160px;
-                    min-height: 160px;
-                    gap: 2px;
+                    max-height: 152px;
+                    min-height: 152px;
+                    gap: 4px;
 
                     .log-item {
                         display: flex;
                         flex-direction: row;
                         word-break: break-all;
+                        font-size: 14px;
                     }
                 }
             }
@@ -507,6 +551,15 @@ onBeforeUnmount(() => {
     left: 10px;
     background-color: white;
     padding: 0 5px;
-    color: #7e7e7e;
+    color: #363636;
+}
+
+.selector-selected {
+    display: flex;
+    flex-direction: row;
+
+    .selected-title {
+        color: #252525;
+    }
 }
 </style>
