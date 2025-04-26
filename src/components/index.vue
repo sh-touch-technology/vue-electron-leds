@@ -7,8 +7,7 @@
                     <div class="groupbox-content row">
                         <el-select v-model="data.com_port_selected" filterable placeholder="请选择监听串口"
                             style="min-width: 220px;flex: 1;" :popper-options="popper_options">
-                            <el-option v-for="item in com_port_list" :key="item.port" :label="item.port"
-                                :value="item.port"
+                            <el-option v-for="item in com_port_list" :key="item.port" :label="item.port" :value="item.port"
                                 style="display: flex;flex-direction: row;justify-content: space-between;">
                                 <span style="">
                                     {{ item.port }}
@@ -84,8 +83,7 @@
                                 </template>
                             </el-select>
                             <!-- 行数 -->
-                            <el-select v-model="data.line_num" filterable style="flex: 1;"
-                                :popper-options="popper_options">
+                            <el-select v-model="data.line_num" filterable style="flex: 1;" :popper-options="popper_options">
                                 <el-option :key="1" :label="1" :value="1">
                                     <span style="">1</span>
                                 </el-option>
@@ -102,8 +100,8 @@
                             <!-- 每行汉字数 -->
                             <el-select v-model="data.line_text_num" filterable style="flex: 1;"
                                 :popper-options="popper_options">
-                                <el-option v-for="item in Array.from({ length: 33 }, (_, i) => i)" :key="item"
-                                    :label="item" :value="item">
+                                <el-option v-for="item in Array.from({ length: 33 }, (_, i) => i)" :key="item" :label="item"
+                                    :value="item">
                                     <span style="">{{ item }}</span>
                                 </el-option>
                                 <template #label>
@@ -188,18 +186,19 @@
                                     <span style="float: left">{{ `${item.label}(${item.channel})` }}</span>
                                 </el-option>
                                 <template #label>
-                                    <span class="selector-selected"
-                                        :style="computeSelectStyle(data.com_channel_selected)">
+                                    <span class="selector-selected" :style="computeSelectStyle(data.com_channel_selected)">
                                         <p class="selected-title">信道选择：</p>
                                         <p class="selected-content">
-                                            {{ `${channelDefined[data.com_channel_selected].label}(${data.com_channel_selected})` }}
+                                            {{
+                                                `${channelDefined[data.com_channel_selected].label}(${data.com_channel_selected})`
+                                            }}
                                         </p>
                                     </span>
                                 </template>
                             </el-select>
                             <div class="button-area wrap">
+                                <el-button type="primary" plain @click="editMainControl()">主控修改</el-button>
                                 <el-button type="primary" plain @click="readMainControl()">主控读取</el-button>
-                                <el-button type="primary" plain>主控修改</el-button>
                                 <el-button type="primary" plain>无线控制卡</el-button>
                             </div>
                         </div>
@@ -215,7 +214,10 @@
                     <!-- 日志 -->
                     <div class="groupbox" data-title="日志" style="flex:1;">
                         <div class="log-list" id="logContainer">
-                            <div class="log-item" v-for="item in log_list" :key="item.id"
+                            <el-segmented v-model="log_debug"
+                                :options="[{ label: '普通', value: false }, { label: '调试', value: true }]"
+                                style="position: absolute;right: 10px;top: 10px;" size="small"/>
+                            <div class="log-item" v-for="item in show_log_list" :key="item.id"
                                 :style="computeLogColor(item.level)">
                                 <p>{{ item.time }} - {{ item.msg }}</p>
                             </div>
@@ -229,10 +231,10 @@
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount, ref, nextTick, toRefs } from 'vue';
+import { onMounted, onBeforeUnmount, ref, nextTick, toRefs, computed } from 'vue';
 import { channelDefined } from './channel';
 import { ConfigDataStore } from '@pinia/ConfigData.js';
-import { getReadMainControlData } from './ledsUtil.js';
+import * as ledsUtil from './ledsUtil.js';
 
 const ConfigData = ConfigDataStore();
 //Popper.js配置
@@ -244,6 +246,17 @@ const com_port_list = ref([]);
 const com_state = ref(false);
 //日志列表
 const log_list = ref([]);
+//日志显示debug级别
+const log_debug = ref(false);
+//渲染日志列表
+const show_log_list = computed(() => {
+    console.log('log_debug.value',log_debug.value);
+    if (log_debug.value) {
+        return log_list.value;
+    }
+    const result = log_list.value.filter(item => item.level !== 'debug');
+    return result;
+})
 
 //设置数据
 const { config: data } = toRefs(ConfigData);
@@ -291,10 +304,17 @@ const sendSerialPortMessage = (frame) => {
     window.electron.sendSerialPortMessage(frame);
 }
 
+//主控修改
+const editMainControl = () =>{
+    log('主控修改');
+    const frame = ledsUtil.getEditMainControlData(data.value.com_channel_selected);
+    sendSerialPortMessage(frame);
+}
+
 //主控读取
 const readMainControl = () => {
-    console.log('data.value.com_channel_selected',data.value.com_channel_selected);
-    const frame = getReadMainControlData(data.value.com_channel_selected);
+    log('主控读取');
+    const frame = ledsUtil.getReadMainControlData(data.value.com_channel_selected);
     sendSerialPortMessage(frame);
 }
 
@@ -329,6 +349,10 @@ const computeLogColor = (level) => {
         case 'error':
             return {
                 color: '#F56C6C'
+            }
+        case 'debug':
+            return {
+                color: '#b12dff'
             }
         default:
             return {
@@ -377,7 +401,7 @@ onMounted(() => {
     // 监听串口监听接收数据
     cleanupFns.push(
         window.electron.onSerialMessage((data) => {
-            log(`串口接收：${data.join(' ')} hex(${data.map(num => num.toString(16).padStart(2, '0').toUpperCase()).join(' ')})`, 'default')
+            log(`串口接收：${data.join(' ')} hex(${data.map(num => num.toString(16).padStart(2, '0').toUpperCase()).join(' ')})`, 'debug')
         })
     );
     getSerialPortList();

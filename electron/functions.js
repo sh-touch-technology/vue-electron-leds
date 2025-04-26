@@ -34,7 +34,7 @@ function initStore() {
             data_forward_or_reverse_direction: true, //数据正反向
             oe_polarity: false, //OE极性
             dot_matrix: 32, //点阵选择
-            com_channel_selected: null, //信道选择
+            com_channel_selected: 23, //信道选择
         }
     });
 }

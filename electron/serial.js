@@ -93,7 +93,7 @@ function sendSerialPortMessage(dataArray, view) {
         }
         const data_info = dataArray.join(' ') + ` hex(${dataArray.map(num => num.toString(16).padStart(2, '0').toUpperCase()).join(' ')})`;
         printLog(`[串口发送]${data_info}`);
-        view.webContents.send('serial-data', { type: 'com-state-message', flag: 'default', msg: '串口发送：' + data_info });
+        view.webContents.send('serial-data', { type: 'com-state-message', flag: 'debug', msg: '串口发送：' + data_info });
     });
 }
 
