@@ -35,6 +35,7 @@ function initStore() {
             oe_polarity: false, //OE极性
             dot_matrix: 32, //点阵选择
             com_channel_selected: 23, //信道选择
+            device_type: 1, //设备类型
         }
     });
 }
@@ -112,7 +113,7 @@ function exitMainwindow() {
 function createMainWindowView() {
 
     mainWindow = new BrowserWindow({
-        width: 950,
+        width: 1000,
         height: 750,
         x: 0,
         y: 0,

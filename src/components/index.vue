@@ -7,7 +7,8 @@
                     <div class="groupbox-content row">
                         <el-select v-model="data.com_port_selected" filterable placeholder="请选择监听串口"
                             style="min-width: 220px;flex: 1;" :popper-options="popper_options">
-                            <el-option v-for="item in com_port_list" :key="item.port" :label="item.port" :value="item.port"
+                            <el-option v-for="item in com_port_list" :key="item.port" :label="item.port"
+                                :value="item.port"
                                 style="display: flex;flex-direction: row;justify-content: space-between;">
                                 <span style="">
                                     {{ item.port }}
@@ -41,7 +42,7 @@
                 <div class="groupbox" data-title="选择屏号" style="flex: 1;">
                     <div class="groupbox-content row">
                         <el-select v-model="data.screen_selected" filterable placeholder="请选择屏号"
-                            style="min-width: 200px;flex: 1;" :popper-options="popper_options">
+                            style="min-width: 150px;flex: 1;" :popper-options="popper_options">
                             <el-option v-for="screen in Array.from({ length: 256 }, (_, i) => i)" :key="screen"
                                 :label="screen" :value="screen"
                                 style="display: flex;flex-direction: row;justify-content: space-between;">
@@ -56,9 +57,14 @@
                         </el-select>
                     </div>
                 </div>
-                <div class="close">
-                    <div class="close-button">
-                        <p>退出</p>
+                <!-- 设备类型 -->
+                <div class="groupbox" data-title="设备类型" style="flex: 1;">
+                    <div class="groupbox-content row">
+                        <el-segmented v-model="data.device_type" :options="[
+                            { label: '窗口屏', value: 1 },
+                            { label: '综合屏', value: 2 },
+                            { label: '喇叭', value: 3 },
+                            { label: '75E接口窗口屏', value: 4 }]" @change="" />
                     </div>
                 </div>
             </el-header>
@@ -83,7 +89,8 @@
                                 </template>
                             </el-select>
                             <!-- 行数 -->
-                            <el-select v-model="data.line_num" filterable style="flex: 1;" :popper-options="popper_options">
+                            <el-select v-model="data.line_num" filterable style="flex: 1;"
+                                :popper-options="popper_options">
                                 <el-option :key="1" :label="1" :value="1">
                                     <span style="">1</span>
                                 </el-option>
@@ -100,8 +107,8 @@
                             <!-- 每行汉字数 -->
                             <el-select v-model="data.line_text_num" filterable style="flex: 1;"
                                 :popper-options="popper_options">
-                                <el-option v-for="item in Array.from({ length: 33 }, (_, i) => i)" :key="item" :label="item"
-                                    :value="item">
+                                <el-option v-for="item in Array.from({ length: 33 }, (_, i) => i)" :key="item"
+                                    :label="item" :value="item">
                                     <span style="">{{ item }}</span>
                                 </el-option>
                                 <template #label>
@@ -164,7 +171,7 @@
                                 </template>
                             </el-select>
                             <div class="button-area wrap">
-                                <el-button type="primary" plain>修改设置</el-button>
+                                <el-button type="primary" plain @click="editBaseSetting">修改设置</el-button>
                             </div>
                         </div>
                     </div>
@@ -186,12 +193,13 @@
                                     <span style="float: left">{{ `${item.label}(${item.channel})` }}</span>
                                 </el-option>
                                 <template #label>
-                                    <span class="selector-selected" :style="computeSelectStyle(data.com_channel_selected)">
+                                    <span class="selector-selected"
+                                        :style="computeSelectStyle(data.com_channel_selected)">
                                         <p class="selected-title">信道选择：</p>
                                         <p class="selected-content">
                                             {{
-                                                `${channelDefined[data.com_channel_selected].label}(${data.com_channel_selected})`
-                                            }}
+                            `${channelDefined[data.com_channel_selected].label}(${data.com_channel_selected})`
+                        }}
                                         </p>
                                     </span>
                                 </template>
@@ -199,7 +207,7 @@
                             <div class="button-area wrap">
                                 <el-button type="primary" plain @click="editMainControl()">主控修改</el-button>
                                 <el-button type="primary" plain @click="readMainControl()">主控读取</el-button>
-                                <el-button type="primary" plain>无线控制卡</el-button>
+                                <el-button type="primary" plain @click="wirelessControlCard()">无线控制卡</el-button>
                             </div>
                         </div>
                     </div>
@@ -216,12 +224,18 @@
                         <div class="log-list" id="logContainer">
                             <el-segmented v-model="log_debug"
                                 :options="[{ label: '普通', value: false }, { label: '调试', value: true }]"
-                                style="position: absolute;right: 10px;top: 10px;" size="small"/>
+                                style="position: absolute;right: 10px;top: 10px;" size="small"
+                                @change="logLevelChange" />
                             <div class="log-item" v-for="item in show_log_list" :key="item.id"
                                 :style="computeLogColor(item.level)">
                                 <p>{{ item.time }} - {{ item.msg }}</p>
                             </div>
                         </div>
+                    </div>
+                    <div class="control-panel">
+                        <el-button plain style="flex: 1;" @click="log_list.length = 0">清空日志</el-button>
+                        <el-button plain style="flex: 1;">重启程序</el-button>
+                        <el-button type="primary" plain style="flex: 2;">退出程序</el-button>
                     </div>
                 </div>
             </el-main>
@@ -250,7 +264,6 @@ const log_list = ref([]);
 const log_debug = ref(false);
 //渲染日志列表
 const show_log_list = computed(() => {
-    console.log('log_debug.value',log_debug.value);
     if (log_debug.value) {
         return log_list.value;
     }
@@ -260,6 +273,9 @@ const show_log_list = computed(() => {
 
 //设置数据
 const { config: data } = toRefs(ConfigData);
+
+//主控返回数据超时计时器
+const mainControlDataReturnTimer = ref(null);
 
 //日志函数
 let log_id = 0;
@@ -277,6 +293,13 @@ const log = (msg, level) => {
         level: level
     })
     log_id++;
+    nextTick(() => {
+        const logContainer = document.getElementById('logContainer');
+        logContainer.scrollTop = logContainer.scrollHeight;
+    });
+}
+
+const logLevelChange = () => {
     nextTick(() => {
         const logContainer = document.getElementById('logContainer');
         logContainer.scrollTop = logContainer.scrollHeight;
@@ -305,10 +328,17 @@ const sendSerialPortMessage = (frame) => {
 }
 
 //主控修改
-const editMainControl = () =>{
+const editMainControl = () => {
     log('主控修改');
     const frame = ledsUtil.getEditMainControlData(data.value.com_channel_selected);
     sendSerialPortMessage(frame);
+    if (mainControlDataReturnTimer.value) {
+        clearTimeout(mainControlDataReturnTimer.value);
+        mainControlDataReturnTimer.value = null;
+    }
+    mainControlDataReturnTimer.value = setTimeout(() => {
+        log('与主控通信失败：返回数据超时', 'error')
+    }, 1000);
 }
 
 //主控读取
@@ -316,7 +346,59 @@ const readMainControl = () => {
     log('主控读取');
     const frame = ledsUtil.getReadMainControlData(data.value.com_channel_selected);
     sendSerialPortMessage(frame);
+    if (mainControlDataReturnTimer.value) {
+        clearTimeout(mainControlDataReturnTimer.value);
+        mainControlDataReturnTimer.value = null;
+    }
+    mainControlDataReturnTimer.value = setTimeout(() => {
+        log('与主控通信失败：返回数据超时', 'error')
+    }, 1000);
 }
+
+//无线控制卡
+const wirelessControlCard = () => {
+    log('无线控制卡');
+    const frame = ledsUtil.getEditWirelessControlCardChannelData(data.value.com_channel_selected);
+    sendSerialPortMessage(frame);
+}
+
+//修改基本设置
+const editBaseSetting = () => {
+    log('修改控制卡基本设置');
+    const setting = {
+        ph: data.value.screen_selected,
+        xgph: data.value.screen_edit,
+        hs: data.value.line_num,
+        mhzs: data.value.line_text_num,
+        zf: data.value.data_forward_or_reverse_direction,
+        oe: data.value.oe_polarity,
+        m_sdot: data.value.dot_matrix,
+    };
+    const frame = ledsUtil.getEditBaseSettingData(setting);
+    sendSerialPortMessage(frame);
+}
+
+const convertFrameToChannel = (frame) => {
+    try {
+        if (frame.length < 5) {
+            log('主控返回数据帧校验失败：数据帧长度不足', 'error');
+            return null;
+        }
+        const n1 = frame[3]; // 第四个字节
+        const n2 = frame[4]; // 第五个字节
+
+        let ten = (n1 === 0) ? 0 : (n1 - 0x30); // 如果n1是0，表示没有十位
+        let one = n2 - 0x30;
+
+        let address = ten * 10 + one;
+        return address;
+    }
+    catch (error) {
+        log('主控返回数据帧校验失败：' + error, 'error');
+        return null;
+    }
+}
+
 
 //保存取消监听渲染进程消息的函数
 let cleanupFns = [];
@@ -400,8 +482,21 @@ onMounted(() => {
 
     // 监听串口监听接收数据
     cleanupFns.push(
-        window.electron.onSerialMessage((data) => {
-            log(`串口接收：${data.join(' ')} hex(${data.map(num => num.toString(16).padStart(2, '0').toUpperCase()).join(' ')})`, 'debug')
+        window.electron.onSerialMessage((frame) => {
+            log(`串口接收：${frame.join(' ')} (${frame.map(num => num.toString(16).padStart(2, '0').toUpperCase()).join(' ')})`, 'debug');
+            if (frame.length === 6 && frame[2] === 82) {
+                if (mainControlDataReturnTimer.value) {
+                    clearTimeout(mainControlDataReturnTimer.value);
+                    mainControlDataReturnTimer.value = null;
+                }
+                const channel = convertFrameToChannel(frame);
+                if (channel) {
+                    data.value.com_channel_selected = channel;
+                    log('与主控通信成功，信道：' + channel, 'success');
+                    return;
+                }
+                log('与主控通信失败：主控返回数据帧校验失败', 'error');
+            }
         })
     );
     getSerialPortList();
@@ -447,32 +542,7 @@ onBeforeUnmount(() => {
             //     flex-direction: row;
             //     gap: 10px;
             // }
-            .close {
-                .close-button {
-                    width: 120px;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    background-color: rgb(236 245 255);
-                    border: 1px solid;
-                    border-radius: 3px;
-                    border-color: rgb(160 207 255);
-                    color: #409EFF;
-                    cursor: pointer;
 
-                    p {
-                        margin-bottom: 2px;
-                        margin-left: 5px;
-                        letter-spacing: 5px;
-                    }
-                }
-
-                .close-button:hover {
-                    color: white;
-                    background-color: #409EFF;
-                }
-            }
         }
 
         .main {
@@ -497,6 +567,7 @@ onBeforeUnmount(() => {
             }
 
             .log {
+                flex: 1;
                 display: flex;
                 flex-direction: row;
                 gap: 10px;
@@ -518,6 +589,19 @@ onBeforeUnmount(() => {
                         flex-direction: row;
                         word-break: break-all;
                         font-size: 14px;
+                    }
+                }
+
+                .control-panel {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: start;
+                    gap: 10px;
+
+                    .el-button {
+                        margin: 0;
+                        width: 120px;
                     }
                 }
             }
