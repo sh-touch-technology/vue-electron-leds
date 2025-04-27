@@ -36,6 +36,8 @@ function initStore() {
             dot_matrix: 32, //点阵选择
             com_channel_selected: 23, //信道选择
             device_type: 1, //设备类型
+            screen_window_sequence_and_name: '&Y01|&Y窗口号与业务名&R称', //窗口序号和名称
+            screen_initial_content: '&Y欢迎光临欢迎光临', //初始显示内容设置
         }
     });
 }

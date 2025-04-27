@@ -23,7 +23,7 @@
                                         <p class="selected-title">串口选择：</p>
                                         <p class="selected-content">{{ data.com_port_selected }}</p>
                                     </span>
-                                    <el-tag style="margin-left: auto;height: 20px;border-radius: 4px;"
+                                    <el-tag style="margin-left: auto;height: 20px;border-radius: 4px;padding-left: 5px;padding-right: 5px;"
                                         :type="com_state ? 'success' : 'info'">
                                         {{ com_state ? '监听中' : '未监听' }}
                                     </el-tag>
@@ -50,7 +50,7 @@
                             </el-option>
                             <template #label>
                                 <span class="selector-selected" :style="computeSelectStyle(data.screen_selected)">
-                                    <p class="selected-title">屏号选择：</p>
+                                    <p class="selected-title">当前屏号：</p>
                                     <p class="selected-content">{{ data.screen_selected }}</p>
                                 </span>
                             </template>
@@ -76,7 +76,7 @@
                             <!-- 修改屏号 -->
                             <el-select v-model="data.screen_edit" filterable placeholder="请选择修改屏号"
                                 style="min-width: 200px;flex: 1;" :popper-options="popper_options">
-                                <el-option v-for="screen in Array.from({ length: 256 }, (_, i) => i)" :key="screen"
+                                <el-option v-for="screen in Array.from({ length: 255 }, (_, i) => i + 1)" :key="screen"
                                     :label="screen" :value="screen"
                                     style="display: flex;flex-direction: row;justify-content: space-between;">
                                     <span style="">{{ screen }}</span>
@@ -177,7 +177,15 @@
                     </div>
                     <!-- 初始显示内容设置 -->
                     <div class="groupbox" data-title="初始显示内容设置" style="flex:1;">
-
+                        <div class="groupbox-content column initial-content-setting"
+                            style="height: 100%;display: flex;">
+                            <el-input v-model="data.screen_window_sequence_and_name" :rows="2" type="textarea"
+                                style="flex: 1;height: 100%;" resize="none" />
+                            <el-button type="primary" plain>设置窗口序号和名称</el-button>
+                            <el-input v-model="data.screen_initial_content" :rows="2" type="textarea"
+                                style="flex: 1;height: 100%;" resize="none" />
+                            <el-button type="primary" plain>设置初始显示内容</el-button>
+                        </div>
                     </div>
                     <!-- 扩展设置 -->
                     <div class="groupbox" data-title="扩展设置" style="flex:1;">
@@ -198,8 +206,8 @@
                                         <p class="selected-title">信道选择：</p>
                                         <p class="selected-content">
                                             {{
-                            `${channelDefined[data.com_channel_selected].label}(${data.com_channel_selected})`
-                        }}
+                                                `${channelDefined[data.com_channel_selected].label}(${data.com_channel_selected})`
+                                            }}
                                         </p>
                                     </span>
                                 </template>
@@ -224,7 +232,7 @@
                         <div class="log-list" id="logContainer">
                             <el-segmented v-model="log_debug"
                                 :options="[{ label: '普通', value: false }, { label: '调试', value: true }]"
-                                style="position: absolute;right: 10px;top: 10px;" size="small"
+                                style="position: absolute;right: 16px;top: 10px;" size="small"
                                 @change="logLevelChange" />
                             <div class="log-item" v-for="item in show_log_list" :key="item.id"
                                 :style="computeLogColor(item.level)">
@@ -233,9 +241,10 @@
                         </div>
                     </div>
                     <div class="control-panel">
-                        <el-button plain style="flex: 1;" @click="log_list.length = 0">清空日志</el-button>
-                        <el-button plain style="flex: 1;">重启程序</el-button>
-                        <el-button type="primary" plain style="flex: 2;">退出程序</el-button>
+                        <el-button type="info" plain style="flex: 1;" @click="log_list.length = 0">清空日志</el-button>
+                        <el-button type="success" plain style="flex: 1;">重置设置</el-button>
+                        <el-button type="primary" plain style="flex: 1;">程序重启</el-button>
+                        <el-button type="danger" plain style="flex: 1;">退出程序</el-button>
                     </div>
                 </div>
             </el-main>
@@ -512,13 +521,52 @@ onBeforeUnmount(() => {
 
 </script>
 
+<style lang="scss">
+.initial-content-setting {
+    .el-textarea__inner {
+        height: 100%;
+        color: #474747;
+        padding-right: 2px;
+    }
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+    margin-right: 2px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+    margin-right: 2px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+    transition: all 0.3s;
+    margin-right: 2px;
+
+    &:hover {
+        background: #a8a8a8;
+    }
+}
+
+/* 火狐浏览器滚动条样式 */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 #f1f1f1;
+}
+</style>
 <style lang="scss" scoped>
 .common-layout {
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: row;
-    padding: 18px 10px 12px 10px;
+    padding: 16px 8px 10px 8px;
 
     .main-container {
         display: flex;
@@ -547,7 +595,7 @@ onBeforeUnmount(() => {
 
         .main {
             flex: 1;
-            padding: 18px 0 0 0;
+            padding: 16px 0 0 0;
             display: flex;
             flex-direction: column;
             gap: 18px;
@@ -563,14 +611,14 @@ onBeforeUnmount(() => {
                 flex: 1;
                 display: flex;
                 flex-direction: row;
-                gap: 10px;
+                gap: 8px;
             }
 
             .log {
                 flex: 1;
                 display: flex;
                 flex-direction: row;
-                gap: 10px;
+                gap: 8px;
 
                 .groupbox {
                     padding-top: 12px;
@@ -616,7 +664,7 @@ onBeforeUnmount(() => {
 
 .groupbox {
     position: relative;
-    padding: 10px;
+    padding: 8px;
     border: 1px solid #ccc;
     border-radius: 3.5px;
 
@@ -627,7 +675,7 @@ onBeforeUnmount(() => {
         .button-area.wrap {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         .button-area.wrap>* {
@@ -648,7 +696,7 @@ onBeforeUnmount(() => {
 
     .groupbox-content.column {
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
     }
 }
 
@@ -660,6 +708,7 @@ onBeforeUnmount(() => {
     background-color: white;
     padding: 0 5px;
     color: #363636;
+    font-size: 15px;
 }
 
 .selector-selected {
