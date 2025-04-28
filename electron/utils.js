@@ -1,6 +1,7 @@
-const { app} = require('electron')
+const { app } = require('electron')
 const log = require('electron-log/main');
 const path = require('path');
+const iconv = require('iconv-lite');
 
 //日志目录
 const logFilePath = path.resolve(app.getPath('home'), '首环日志\\条屏设置');
@@ -20,4 +21,40 @@ function printLog(message) {
     log.info(message);
 }
 
-module.exports = { initLog, printLog };
+//iconv-lite字符串转gbk编码数组
+function convertStringToGbkCodeArray(inputString) {
+    try {
+        const data = [];
+
+        for (let i = 0; i < inputString.length; i++) {
+            const char = inputString[i];
+            const code = char.charCodeAt(0);
+
+            if (code > 127 || code < 16) {
+                // 用GBK编码这个字符
+                const gbkBuffer = iconv.encode(char, 'gbk'); // 注意是 'gbk' 小写
+
+                for (let j = 0; j < gbkBuffer.length; j++) {
+                    const byte = gbkBuffer[j];
+                    data.push((byte >> 4) & 0x0F); // 高四位
+                    data.push(byte & 0x0F);         // 低四位
+                }
+            } else {
+                data.push(code);
+            }
+        }
+        return {
+            state: true,
+            data: data
+        };
+    }
+    catch (error) {
+        return {
+            state: false,
+            message: '字符串编码失败，错误：' + error,
+            data: []
+        };
+    }
+}
+
+module.exports = { initLog, printLog, convertStringToGbkCodeArray };

@@ -7,23 +7,31 @@ export const ConfigDataStore = defineStore('ConfigData', () => {
     const config = ref({});
 
     const Init = (data) => {
+        init_tate = false;
         config.value = data;
         console.log('config存储初始化', config);
-        setTimeout(()=>{
+        setTimeout(() => {
             init_tate = true;
-        },1000)
+        }, 1000)
     };
+
+    const resetSetting = () => {
+        window.electron.resetSetting().then((configData) => {
+            console.log('获取到配置信息：', configData);
+            ConfigDataStore().Init(configData);
+        });
+    }
 
     //监听配置变化
     watch(
         () => config.value,
         (newVal, oldVal) => {
-            console.log('person对象发生变化:', JSON.stringify(newVal));
+            //console.log('person对象发生变化:', JSON.stringify(newVal));
             init_tate && window.electron.saveConfig(JSON.stringify(newVal)).then((result) => {
                 if (result) {
-                    console.log('保存成功')
+                    //console.log('保存成功')
                 } else {
-                    console.log("保存失败");
+                    console.error("配置文件保存失败");
                 }
             });
         },
@@ -31,6 +39,6 @@ export const ConfigDataStore = defineStore('ConfigData', () => {
     )
 
     return {
-        config, Init
+        config, Init, resetSetting
     }
 })

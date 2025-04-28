@@ -16,7 +16,7 @@ function getAdlAdh(ph) {
 function getH4L4(num) {
     const h4 = ((num >> 4) & 0x0F);
     const l4 = (num & 0x0F);
-    
+
     if (l4 === 0 && num < 128) {
         return [(h4 << 4)];
     } else {
@@ -111,6 +111,36 @@ export function getEditBaseSettingData(setting) {
     //结束符
     pms.push(26);
     const check_sum = calculateCheckSum(pms);
+    const data = [...adl_adh, ...pms, check_sum];
+    return data;
+}
+
+export function getLedContendSendData(setting) {
+    // if (typeof ph !== 'number' || ph < 0 || ph > 255) {
+    //     throw new Error("屏号(ph)必须是0~255之间的数字");
+    // }
+    // if (typeof cmd !== 'string' || cmd.length !== 1) {
+    //     throw new Error("cmd必须是一个单字符字符串");
+    // }
+    // if (typeof text !== 'string' || text.length === 0) {
+    //     throw new Error("文本内容不能为空");
+    // }
+    const { ph, encodeArray, cmd } = setting;
+
+    const pms = [];
+    const adl_adh = getAdlAdh(ph);
+
+    // 命令
+    pms.push(cmd.charCodeAt(0));
+
+    // 文本内容（GBK编码）
+    pms.push(...encodeArray);
+
+    // 结束符 0x1A
+    pms.push(0x1A);
+
+    const check_sum = calculateCheckSum(pms);
+
     const data = [...adl_adh, ...pms, check_sum];
     return data;
 }

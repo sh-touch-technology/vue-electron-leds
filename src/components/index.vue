@@ -23,7 +23,8 @@
                                         <p class="selected-title">串口选择：</p>
                                         <p class="selected-content">{{ data.com_port_selected }}</p>
                                     </span>
-                                    <el-tag style="margin-left: auto;height: 20px;border-radius: 4px;padding-left: 5px;padding-right: 5px;"
+                                    <el-tag
+                                        style="margin-left: auto;height: 20px;border-radius: 4px;padding-left: 5px;padding-right: 5px;"
                                         :type="com_state ? 'success' : 'info'">
                                         {{ com_state ? '监听中' : '未监听' }}
                                     </el-tag>
@@ -180,11 +181,13 @@
                         <div class="groupbox-content column initial-content-setting"
                             style="height: 100%;display: flex;">
                             <el-input v-model="data.screen_window_sequence_and_name" :rows="2" type="textarea"
-                                style="flex: 1;height: 100%;" resize="none" />
-                            <el-button type="primary" plain>设置窗口序号和名称</el-button>
+                                style="flex: 1;height: 100%;" resize="none" :spellcheck="false" autocomplete="off" />
+                            <el-button type="primary" plain
+                                @click="ledContentSend(data.screen_window_sequence_and_name, 'W')">设置窗口序号和名称</el-button>
                             <el-input v-model="data.screen_initial_content" :rows="2" type="textarea"
-                                style="flex: 1;height: 100%;" resize="none" />
-                            <el-button type="primary" plain>设置初始显示内容</el-button>
+                                style="flex: 1;height: 100%;" resize="none" :spellcheck="false" autocomplete="off" />
+                            <el-button type="primary" plain
+                                @click="ledContentSend(data.screen_initial_content, 'S')">设置初始显示内容</el-button>
                         </div>
                     </div>
                     <!-- 扩展设置 -->
@@ -206,8 +209,8 @@
                                         <p class="selected-title">信道选择：</p>
                                         <p class="selected-content">
                                             {{
-                                                `${channelDefined[data.com_channel_selected].label}(${data.com_channel_selected})`
-                                            }}
+                            `${channelDefined[data.com_channel_selected].label}(${data.com_channel_selected})`
+                        }}
                                         </p>
                                     </span>
                                 </template>
@@ -220,10 +223,27 @@
                         </div>
                     </div>
                 </div>
+                <div class="info">
+                    <!-- 提示信息 -->
+                    <div class="groupbox" data-title="" style="flex:1;">
+                        <div class="groupbox-content column initial-content-setting"
+                            style="height: 100%;display: flex;">
+                            <p>注1：当前屏号选择0时，为广播设置（V532板广播不修改地址！）</p>
+                            <p>注2：设置窗口名称“&Y001 |&G行政服务中心”，在24或32点阵窗口屏显示黄色64点阵001窗口序号</p>
+                            <p>注3：需要</p>
+                        </div>
+                    </div>
+                </div>
                 <div class="test">
                     <!-- 测试显示指令 -->
                     <div class="groupbox" data-title="测试显示指令" style="flex:1;">
-                        <el-button type="primary" plain @click="sendSerialPortMessage">测试发送</el-button>
+                        <div class="groupbox-content column initial-content-setting"
+                            style="height: 100%;display: flex;">
+                            <el-input v-model="data.send_test_content" :rows="2" type="textarea"
+                                style="flex: 1;height: 100%;" resize="none" :spellcheck="false" autocomplete="off" />
+                            <el-button type="primary" plain @click="ledContentSend(data.send_test_content, 'D')"
+                                style="width: 180px;">发送测试显示信息</el-button>
+                        </div>
                     </div>
                 </div>
                 <div class="log">
@@ -232,7 +252,7 @@
                         <div class="log-list" id="logContainer">
                             <el-segmented v-model="log_debug"
                                 :options="[{ label: '普通', value: false }, { label: '调试', value: true }]"
-                                style="position: absolute;right: 16px;top: 10px;" size="small"
+                                style="position: absolute;right: 17px;top: 12px;" size="small"
                                 @change="logLevelChange" />
                             <div class="log-item" v-for="item in show_log_list" :key="item.id"
                                 :style="computeLogColor(item.level)">
@@ -242,9 +262,9 @@
                     </div>
                     <div class="control-panel">
                         <el-button type="info" plain style="flex: 1;" @click="log_list.length = 0">清空日志</el-button>
-                        <el-button type="success" plain style="flex: 1;">重置设置</el-button>
-                        <el-button type="primary" plain style="flex: 1;">程序重启</el-button>
-                        <el-button type="danger" plain style="flex: 1;">退出程序</el-button>
+                        <el-button type="success" plain style="flex: 1;" @click="resetSetting">重置设置</el-button>
+                        <el-button type="primary" plain style="flex: 1;" @click="appRelaunch">程序重启</el-button>
+                        <el-button type="danger" plain style="flex: 1;" @click="exitApp">退出程序</el-button>
                     </div>
                 </div>
             </el-main>
@@ -387,6 +407,26 @@ const editBaseSetting = () => {
     sendSerialPortMessage(frame);
 }
 
+//内容发送
+const ledContentSend = (text, cmd) => {
+    log('控制卡内容发送');
+    window.electron.convertStringToGbkEncode(text).then((result) => {
+        if (result.state) {
+            const setting = {
+                ph: data.value.screen_selected,
+                encodeArray: result.data,
+                cmd: cmd
+            };
+            const frame = ledsUtil.getLedContendSendData(setting);
+            sendSerialPortMessage(frame);
+        }
+        else {
+            log(result.message, 'error');
+        }
+    });
+}
+
+//校验主控返回数据帧
 const convertFrameToChannel = (frame) => {
     try {
         if (frame.length < 5) {
@@ -452,6 +492,22 @@ const computeLogColor = (level) => {
     }
 }
 
+const resetSetting = () => {
+    log('重置设置');
+    ConfigData.resetSetting();
+    getSerialPortList();
+}
+
+const appRelaunch = () => {
+    log('程序重启');
+    window.electron.appRelaunch();
+}
+
+const exitApp = () => {
+    log('程序退出');
+    window.electron.exitApp();
+}
+
 onMounted(() => {
     log('程序启动');
 
@@ -462,11 +518,13 @@ onMounted(() => {
                 //接收到串口列表
                 case 'com_port_list':
                     com_port_list.value = obj.data;
-                    log(`串口列表获取成功 ${JSON.stringify(com_port_list.value.map(item => item.port))} ${com_port_list.value.length}个串口`, 'success');
+                    log(`串口列表获取成功 ${com_port_list.value.length}个串口`, 'success');
                     //未选择串口的情况下，自动选择一个串口
                     if (com_port_list.value.length > 0 && !data.value.com_port_selected) {
                         data.value.com_port_selected = com_port_list.value[0].port;
                     }
+                    //自动开始监听串口
+
                     break;
                 //接收到串口打开
                 case 'com-port-open':
@@ -612,6 +670,7 @@ onBeforeUnmount(() => {
                 display: flex;
                 flex-direction: row;
                 gap: 8px;
+                min-height: 180px;
             }
 
             .log {
@@ -619,9 +678,11 @@ onBeforeUnmount(() => {
                 display: flex;
                 flex-direction: row;
                 gap: 8px;
+                min-height: 180px;
 
                 .groupbox {
                     padding-top: 12px;
+                    padding-right: 5px;
                 }
 
                 .log-list {

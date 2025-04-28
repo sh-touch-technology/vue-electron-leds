@@ -1,9 +1,9 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
 const { createMainWindowView, openDialog, openMainwindowDevTools,
     maximizeMainwindow, minimizeMainwindow, exitMainwindow, reloadMainwindow,
-    getConfig, saveConfig, initStore } = require('./functions');
+    getConfig, saveConfig, initStore, resetSetting } = require('./functions');
 const { openSerialPort, releaseSerialPort, sendSerialPortMessage, getSerialPortList } = require('./serial');
-const { printLog, initLog } = require('./utils');
+const { printLog, initLog, convertStringToGbkCodeArray } = require('./utils');
 
 initStore();
 initLog();
@@ -48,8 +48,19 @@ function createWindow() {
         getSerialPortList(mainWindow);
     });
 
+    //字符串gbk编码转换
+    ipcMain.handle('convert-gbk-encode', (event, inputString) => {
+        return convertStringToGbkCodeArray(inputString);
+    });
+
+    //渲染进程设置最小化
+    ipcMain.handle('reset-setting', () => {
+        return resetSetting();
+    });
+
     //渲染进程调用应用程序重启
-    ipcMain.handle('app-relaunch', () => {
+    ipcMain.on('app-relaunch', () => {
+        console.log('appRelaunch')
         app.relaunch();  // 触发重新启动
         app.exit();  // 退出当前应用进程
     })

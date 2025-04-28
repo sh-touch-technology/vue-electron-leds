@@ -39,8 +39,17 @@ contextBridge.exposeInMainWorld('electron', {
     //发送串口消息
     sendSerialPortMessage: (dataArray) => ipcRenderer.send('serial-send-message', dataArray),
 
+    //字符串gbk编码转换
+    convertStringToGbkEncode: (data) => ipcRenderer.invoke('convert-gbk-encode', data),
+
     //弹出electron提示const { title, msg } = obj;
     clientDialog: (obj) => ipcRenderer.send('client-dialog', obj),
+
+    //重置设置
+    resetSetting: () => ipcRenderer.invoke('reset-setting'),
+
+    //应用重启
+    appRelaunch: () => { ipcRenderer.send('app-relaunch'); console.log('appRelaunch') },
 
     // 最小化窗口
     minimizeWindow: () => ipcRenderer.send('minimize-window'),

@@ -2,6 +2,7 @@ const { app, BrowserWindow, BrowserView, Menu, dialog, session } = require('elec
 const path = require('path');
 const Store = require('electron-store');
 const { printLog } = require('./utils');
+const { releaseSerialPort } = require('./serial');
 //const os = require('os');
 
 //发布时改为非dev的值
@@ -14,32 +15,36 @@ let mainWindow;
 //elctron-store存储实例
 let store;
 
+const default_setting = {
+    com_port_selected: null, //选择的串口
+    screen_selected: 255, //选择修改的屏号
+    screen_edit: 255, //修改屏号
+    line_num: 1, //行数
+    line_text_num: 8, //每行汉字数
+    data_forward_or_reverse_direction: true, //数据正反向
+    oe_polarity: false, //OE极性
+    dot_matrix: 32, //点阵选择
+    com_channel_selected: 23, //信道选择
+    device_type: 1, //设备类型
+    screen_window_sequence_and_name: '&Y01|&Y窗口号与业务名&R称', //窗口序号和名称
+    screen_initial_content: '&Y欢迎光临欢迎光临', //初始显示内容设置
+    send_test_content: '请A001到01号窗&G口', //发送测试内容
+}
+
 //初始化存储
 function initStore() {
-    page_store = new Store({
-        name: 'cache',
-        defaults: {
-        }
-    });
-
     store = new Store({
         name: 'config',
         //encryptionKey: 'your-encryption-key', // 数据加密
-        defaults: {
-            com_port_selected: null, //选择的串口
-            screen_selected: 255, //选择修改的屏号
-            screen_edit: 255, //修改屏号
-            line_num: 1, //行数
-            line_text_num: 8, //每行汉字数
-            data_forward_or_reverse_direction: true, //数据正反向
-            oe_polarity: false, //OE极性
-            dot_matrix: 32, //点阵选择
-            com_channel_selected: 23, //信道选择
-            device_type: 1, //设备类型
-            screen_window_sequence_and_name: '&Y01|&Y窗口号与业务名&R称', //窗口序号和名称
-            screen_initial_content: '&Y欢迎光临欢迎光临', //初始显示内容设置
-        }
+        defaults: default_setting
     });
+}
+
+//重置设置
+function resetSetting(){
+    store.store = default_setting;
+    releaseSerialPort(mainWindow);
+    return default_setting;
 }
 
 //获取配置文件
@@ -116,7 +121,7 @@ function createMainWindowView() {
 
     mainWindow = new BrowserWindow({
         width: 1000,
-        height: 750,
+        height: 950,
         x: 0,
         y: 0,
         frame: false, // 去掉窗口边框
@@ -160,5 +165,5 @@ function createMainWindowView() {
 module.exports = {
     createMainWindowView, openDialog, openMainwindowDevTools,
     maximizeMainwindow, minimizeMainwindow, exitMainwindow, reloadMainwindow,
-    saveConfig, getConfig, initStore
+    saveConfig, getConfig, initStore , resetSetting
 };
