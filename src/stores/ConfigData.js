@@ -26,7 +26,7 @@ export const ConfigDataStore = defineStore('ConfigData', () => {
     watch(
         () => config.value,
         (newVal, oldVal) => {
-            //console.log('person对象发生变化:', JSON.stringify(newVal));
+            console.log('person对象发生变化:');
             init_tate && window.electron.saveConfig(JSON.stringify(newVal)).then((result) => {
                 if (result) {
                     //console.log('保存成功')

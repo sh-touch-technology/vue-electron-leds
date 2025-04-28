@@ -29,6 +29,7 @@ const default_setting = {
     screen_window_sequence_and_name: '&Y01|&Y窗口号与业务名&R称', //窗口序号和名称
     screen_initial_content: '&Y欢迎光临欢迎光临', //初始显示内容设置
     send_test_content: '请A001到01号窗&G口', //发送测试内容
+    move_effect: '0', //移动效果
 }
 
 //初始化存储
@@ -41,7 +42,7 @@ function initStore() {
 }
 
 //重置设置
-function resetSetting(){
+function resetSetting() {
     store.store = default_setting;
     releaseSerialPort(mainWindow);
     return default_setting;
@@ -120,8 +121,10 @@ function exitMainwindow() {
 function createMainWindowView() {
 
     mainWindow = new BrowserWindow({
-        width: 1000,
-        height: 950,
+        width: 1200,
+        height: 880,
+        minWidth: 1024,
+        minHeight: 880,
         x: 0,
         y: 0,
         frame: false, // 去掉窗口边框
@@ -165,5 +168,5 @@ function createMainWindowView() {
 module.exports = {
     createMainWindowView, openDialog, openMainwindowDevTools,
     maximizeMainwindow, minimizeMainwindow, exitMainwindow, reloadMainwindow,
-    saveConfig, getConfig, initStore , resetSetting
+    saveConfig, getConfig, initStore, resetSetting
 };

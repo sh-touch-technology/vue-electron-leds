@@ -7,8 +7,7 @@
                     <div class="groupbox-content row">
                         <el-select v-model="data.com_port_selected" filterable placeholder="请选择监听串口"
                             style="min-width: 220px;flex: 1;" :popper-options="popper_options">
-                            <el-option v-for="item in com_port_list" :key="item.port" :label="item.port"
-                                :value="item.port"
+                            <el-option v-for="item in com_port_list" :key="item.port" :label="item.port" :value="item.port"
                                 style="display: flex;flex-direction: row;justify-content: space-between;">
                                 <span style="">
                                     {{ item.port }}
@@ -39,25 +38,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- 屏号选择 -->
-                <div class="groupbox" data-title="选择屏号" style="flex: 1;">
-                    <div class="groupbox-content row">
-                        <el-select v-model="data.screen_selected" filterable placeholder="请选择屏号"
-                            style="min-width: 150px;flex: 1;" :popper-options="popper_options">
-                            <el-option v-for="screen in Array.from({ length: 256 }, (_, i) => i)" :key="screen"
-                                :label="screen" :value="screen"
-                                style="display: flex;flex-direction: row;justify-content: space-between;">
-                                <span style="">{{ screen }}</span>
-                            </el-option>
-                            <template #label>
-                                <span class="selector-selected" :style="computeSelectStyle(data.screen_selected)">
-                                    <p class="selected-title">当前屏号：</p>
-                                    <p class="selected-content">{{ data.screen_selected }}</p>
-                                </span>
-                            </template>
-                        </el-select>
-                    </div>
-                </div>
+
                 <!-- 设备类型 -->
                 <div class="groupbox" data-title="设备类型" style="flex: 1;">
                     <div class="groupbox-content row">
@@ -68,6 +49,8 @@
                             { label: '75E接口窗口屏', value: 4 }]" @change="" />
                     </div>
                 </div>
+
+                <el-button type="primary" plain style="height: 100%;width: 100px;" @click="exitApp">退出程序</el-button>
             </el-header>
             <el-main class="main">
                 <div class="setting">
@@ -76,7 +59,8 @@
                         <div class="groupbox-content column">
                             <!-- 修改屏号 -->
                             <el-select v-model="data.screen_edit" filterable placeholder="请选择修改屏号"
-                                style="min-width: 200px;flex: 1;" :popper-options="popper_options">
+                                style="min-width: 200px;flex: 1;" :popper-options="popper_options"
+                                :filter-method="handleScreenEditInput">
                                 <el-option v-for="screen in Array.from({ length: 255 }, (_, i) => i + 1)" :key="screen"
                                     :label="screen" :value="screen"
                                     style="display: flex;flex-direction: row;justify-content: space-between;">
@@ -90,8 +74,8 @@
                                 </template>
                             </el-select>
                             <!-- 行数 -->
-                            <el-select v-model="data.line_num" filterable style="flex: 1;"
-                                :popper-options="popper_options">
+                            <el-select v-model="data.line_num" filterable style="flex: 1;" :popper-options="popper_options"
+                                :filter-method="handleLineNumInput">
                                 <el-option :key="1" :label="1" :value="1">
                                     <span style="">1</span>
                                 </el-option>
@@ -107,9 +91,9 @@
                             </el-select>
                             <!-- 每行汉字数 -->
                             <el-select v-model="data.line_text_num" filterable style="flex: 1;"
-                                :popper-options="popper_options">
-                                <el-option v-for="item in Array.from({ length: 33 }, (_, i) => i)" :key="item"
-                                    :label="item" :value="item">
+                                :popper-options="popper_options" :filter-method="handleLineTextNumInput">
+                                <el-option v-for="item in Array.from({ length: 33 }, (_, i) => i)" :key="item" :label="item"
+                                    :value="item">
                                     <span style="">{{ item }}</span>
                                 </el-option>
                                 <template #label>
@@ -178,8 +162,7 @@
                     </div>
                     <!-- 初始显示内容设置 -->
                     <div class="groupbox" data-title="初始显示内容设置" style="flex:1;">
-                        <div class="groupbox-content column initial-content-setting"
-                            style="height: 100%;display: flex;">
+                        <div class="groupbox-content column initial-content-setting" style="height: 100%;display: flex;">
                             <el-input v-model="data.screen_window_sequence_and_name" :rows="2" type="textarea"
                                 style="flex: 1;height: 100%;" resize="none" :spellcheck="false" autocomplete="off" />
                             <el-button type="primary" plain
@@ -192,33 +175,71 @@
                     </div>
                     <!-- 扩展设置 -->
                     <div class="groupbox" data-title="扩展设置" style="flex:1;">
-
-                    </div>
-                    <!-- 信道设置 -->
-                    <div class="groupbox" data-title="无线信道" style="flex:1;">
                         <div class="groupbox-content column">
-                            <el-select v-model="data.com_channel_selected" filterable style="min-width: 150px;flex: 1;"
-                                :popper-options="popper_options">
-                                <el-option v-for="item in channelDefined" :key="item.channel"
-                                    :label="`${item.label}(${item.channel})`" :value="item.channel">
-                                    <span style="float: left">{{ `${item.label}(${item.channel})` }}</span>
+                            <!-- 移动效果 -->
+                            <el-select v-model="data.move_effect" style="flex: 1;" :popper-options="popper_options"
+                                disabled>
+                                <el-option :key="0" label="左移" value="0">
+                                    <span style="">左移</span>
                                 </el-option>
                                 <template #label>
-                                    <span class="selector-selected"
-                                        :style="computeSelectStyle(data.com_channel_selected)">
-                                        <p class="selected-title">信道选择：</p>
+                                    <span class="selector-selected" style="color:#909399 ;">
+                                        <p class="selected-title" style="color: #909399;">移动效果：</p>
                                         <p class="selected-content">
-                                            {{
-                            `${channelDefined[data.com_channel_selected].label}(${data.com_channel_selected})`
-                        }}
+                                            {{ data.move_effect === '0' ? '左移' : '其他' }}
                                         </p>
                                     </span>
                                 </template>
                             </el-select>
-                            <div class="button-area wrap">
-                                <el-button type="primary" plain @click="editMainControl()">主控修改</el-button>
-                                <el-button type="primary" plain @click="readMainControl()">主控读取</el-button>
-                                <el-button type="primary" plain @click="wirelessControlCard()">无线控制卡</el-button>
+                        </div>
+                    </div>
+                    <div style="flex: 1;display: flex;flex-direction: column;gap: 18px;">
+                        <!-- 屏号选择 -->
+                        <div class="groupbox" data-title="选择屏号">
+                            <div class="groupbox-content row">
+                                <el-select v-model="data.screen_selected" filterable placeholder="请选择屏号"
+                                    style="min-width: 150px;flex: 1;" :popper-options="popper_options"
+                                    :filter-method="handleScreenSelectInput">
+                                    <el-option v-for="screen in Array.from({ length: 256 }, (_, i) => i)" :key="screen"
+                                        :label="screen" :value="screen"
+                                        style="display: flex;flex-direction: row;justify-content: space-between;">
+                                        <span style="">{{ screen }}</span>
+                                    </el-option>
+                                    <template #label>
+                                        <span class="selector-selected" :style="computeSelectStyle(data.screen_selected)">
+                                            <p class="selected-title">当前屏号：</p>
+                                            <p class="selected-content">{{ data.screen_selected }}</p>
+                                        </span>
+                                    </template>
+                                </el-select>
+                            </div>
+                        </div>
+                        <!-- 信道设置 -->
+                        <div class="groupbox" data-title="无线信道" style="flex:1;">
+                            <div class="groupbox-content column">
+                                <el-select v-model="data.com_channel_selected" filterable style=""
+                                    :popper-options="popper_options">
+                                    <el-option v-for="item in channelDefined" :key="item.channel"
+                                        :label="`${item.label}(${item.channel})`" :value="item.channel">
+                                        <span style="float: left">{{ `${item.label}(${item.channel})` }}</span>
+                                    </el-option>
+                                    <template #label>
+                                        <span class="selector-selected"
+                                            :style="computeSelectStyle(data.com_channel_selected)">
+                                            <p class="selected-title">信道选择：</p>
+                                            <p class="selected-content">
+                                                {{
+                                                    `${channelDefined[data.com_channel_selected].label}(${data.com_channel_selected})`
+                                                }}
+                                            </p>
+                                        </span>
+                                    </template>
+                                </el-select>
+                                <div class="button-area wrap">
+                                    <el-button type="primary" plain @click="editMainControl()">主控修改</el-button>
+                                    <el-button type="primary" plain @click="readMainControl()">主控读取</el-button>
+                                    <el-button type="primary" plain @click="wirelessControlCard()">无线控制卡</el-button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -226,23 +247,32 @@
                 <div class="info">
                     <!-- 提示信息 -->
                     <div class="groupbox" data-title="" style="flex:1;">
-                        <div class="groupbox-content column initial-content-setting"
-                            style="height: 100%;display: flex;">
+                        <div class="groupbox-content column initial-content-setting" style="height: 100%;display: flex;">
                             <p>注1：当前屏号选择0时，为广播设置（V532板广播不修改地址！）</p>
-                            <p>注2：设置窗口名称“&Y001 |&G行政服务中心”，在24或32点阵窗口屏显示黄色64点阵001窗口序号</p>
-                            <p>注3：需要</p>
+                            <p>注2：设置窗口名称"&Y01 |&G行政服务中心"，则在24或32点阵窗口屏以64点阵方式显示黄色01窗口序号。</p>
+                            <p>注3：需要远距离传输选用L00-L31(0-31)低速信道，当窗口较多时，选用H00-H31(32-63)高速信道。</p>
                         </div>
                     </div>
                 </div>
                 <div class="test">
                     <!-- 测试显示指令 -->
                     <div class="groupbox" data-title="测试显示指令" style="flex:1;">
-                        <div class="groupbox-content column initial-content-setting"
-                            style="height: 100%;display: flex;">
+                        <div class="groupbox-content column initial-content-setting" style="height: 100%;display: flex;">
                             <el-input v-model="data.send_test_content" :rows="2" type="textarea"
                                 style="flex: 1;height: 100%;" resize="none" :spellcheck="false" autocomplete="off" />
-                            <el-button type="primary" plain @click="ledContentSend(data.send_test_content, 'D')"
-                                style="width: 180px;">发送测试显示信息</el-button>
+                            <div class="info2">
+                                <el-button type="primary" plain @click="ledContentSend(data.send_test_content, 'D')"
+                                    style="width: 180px;">发送测试显示信息</el-button>
+                                <div>
+                                    <p>注1：单次发送不要超过100个字符（50个汉字）！</p>
+                                    <p>注2：默认红色，'&R'红色，'&G'绿色，'&Y'黄色，'&B'蓝色，'&W'白色，'&V紫色'，'&S'天蓝！</p>
+                                    <p>注3：'#'换行，&1表示圈11</p>
+                                </div>
+                                <div>
+                                    <p>上电.001C04S1（屏号001单行4字左移最快）</p>
+                                    <p>.021DC12S3（屏号021双行12字左移中速）</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -252,8 +282,7 @@
                         <div class="log-list" id="logContainer">
                             <el-segmented v-model="log_debug"
                                 :options="[{ label: '普通', value: false }, { label: '调试', value: true }]"
-                                style="position: absolute;right: 17px;top: 12px;" size="small"
-                                @change="logLevelChange" />
+                                style="position: absolute;right: 17px;top: 12px;" size="small" @change="logLevelChange" />
                             <div class="log-item" v-for="item in show_log_list" :key="item.id"
                                 :style="computeLogColor(item.level)">
                                 <p>{{ item.time }} - {{ item.msg }}</p>
@@ -261,10 +290,9 @@
                         </div>
                     </div>
                     <div class="control-panel">
-                        <el-button type="info" plain style="flex: 1;" @click="log_list.length = 0">清空日志</el-button>
-                        <el-button type="success" plain style="flex: 1;" @click="resetSetting">重置设置</el-button>
+                        <el-button type="primary" plain style="flex: 1;" @click="log_list.length = 0">清空日志</el-button>
+                        <el-button type="primary" plain style="flex: 1;" @click="resetSetting">重置设置</el-button>
                         <el-button type="primary" plain style="flex: 1;" @click="appRelaunch">程序重启</el-button>
-                        <el-button type="danger" plain style="flex: 1;" @click="exitApp">退出程序</el-button>
                     </div>
                 </div>
             </el-main>
@@ -359,6 +387,10 @@ const sendSerialPortMessage = (frame) => {
 //主控修改
 const editMainControl = () => {
     log('主控修改');
+    if (!com_state.value) {
+        log('串口未打开，请先打开串口', 'error');
+        return;
+    }
     const frame = ledsUtil.getEditMainControlData(data.value.com_channel_selected);
     sendSerialPortMessage(frame);
     if (mainControlDataReturnTimer.value) {
@@ -367,12 +399,16 @@ const editMainControl = () => {
     }
     mainControlDataReturnTimer.value = setTimeout(() => {
         log('与主控通信失败：返回数据超时', 'error')
-    }, 1000);
+    }, 800);
 }
 
 //主控读取
 const readMainControl = () => {
     log('主控读取');
+    if (!com_state.value) {
+        log('串口未打开，请先打开串口', 'error');
+        return;
+    }
     const frame = ledsUtil.getReadMainControlData(data.value.com_channel_selected);
     sendSerialPortMessage(frame);
     if (mainControlDataReturnTimer.value) {
@@ -381,12 +417,16 @@ const readMainControl = () => {
     }
     mainControlDataReturnTimer.value = setTimeout(() => {
         log('与主控通信失败：返回数据超时', 'error')
-    }, 1000);
+    }, 800);
 }
 
 //无线控制卡
 const wirelessControlCard = () => {
     log('无线控制卡');
+    if (!com_state.value) {
+        log('串口未打开，请先打开串口', 'error');
+        return;
+    }
     const frame = ledsUtil.getEditWirelessControlCardChannelData(data.value.com_channel_selected);
     sendSerialPortMessage(frame);
 }
@@ -507,6 +547,75 @@ const exitApp = () => {
     log('程序退出');
     window.electron.exitApp();
 }
+
+// 防抖函数
+const debounce = (fn, delay) => {
+    let timer = null;
+    return function (...args) {
+        if (timer) {
+            clearTimeout(timer);
+        }
+        timer = setTimeout(() => {
+            fn.apply(this, args);
+        }, delay);
+    };
+};
+
+// 当前屏号输入处理函数
+const handleScreenSelectInput = debounce((input) => {
+    const numValue = input.replace(/[^\d]/g, '');
+    if (!numValue) {
+        return;
+    }
+    const number = parseInt(numValue);
+    if (number >= 0 && number <= 255) {
+        data.value.screen_selected = number;
+        return;
+    }
+    log('输入数值不正确，修改屏号取值范围0-255', 'warning');
+}, 800);
+
+// 修改屏号输入处理函数
+const handleScreenEditInput = debounce((input) => {
+    const numValue = input.replace(/[^\d]/g, '');
+    if (!numValue) {
+        return;
+    }
+    const number = parseInt(numValue);
+    if (number >= 1 && number <= 255) {
+        data.value.screen_edit = number;
+        return;
+    }
+    log('输入数值不正确，修改屏号取值范围1-255', 'warning');
+}, 800);
+
+//行数输入处理
+const handleLineNumInput = debounce((input) => {
+    const numValue = input.replace(/[^\d]/g, '');
+    if (!numValue) {
+        return;
+    }
+    const number = parseInt(numValue);
+    if (number === 1 || number == 2) {
+        data.value.line_num = number;
+        return;
+    }
+    log('输入数值不正确，行数取值范围1-2', 'warning');
+}, 800);
+
+//每行汉字数
+const handleLineTextNumInput = debounce((input) => {
+    const numValue = input.replace(/[^\d]/g, '');
+    if (!numValue) {
+        return;
+    }
+    const number = parseInt(numValue);
+    if (number >= 0 && number <= 32) {
+        data.value.line_text_num = number;
+        return;
+    }
+    log('输入数值不正确，每行汉字数取值范围0-32', 'warning');
+}, 800);
 
 onMounted(() => {
     log('程序启动');
@@ -656,7 +765,6 @@ onBeforeUnmount(() => {
             padding: 16px 0 0 0;
             display: flex;
             flex-direction: column;
-            gap: 18px;
 
             .setting {
                 flex: 1;
@@ -665,20 +773,59 @@ onBeforeUnmount(() => {
                 gap: 10px;
             }
 
+            .info {
+                margin-top: 10px;
+
+                .groupbox {
+                    padding: 2px 8px 8px 8px;
+                    font-size: 14px;
+                    color: #409EFF;
+
+                    .groupbox-content.column {
+                        gap: 4px;
+                    }
+                }
+            }
+
             .test {
                 flex: 1;
                 display: flex;
                 flex-direction: row;
                 gap: 8px;
-                min-height: 180px;
+                min-height: 150px;
+                margin-top: 18px;
+
+                .groupbox {
+                    padding-bottom: 5px;
+                }
+
+                .groupbox-content.column {
+                    gap: 6px;
+                }
+
+                .info2 {
+                    display: flex;
+                    flex-direction: row;
+                    font-size: 12px;
+                    color: #409EFF;
+                    justify-content: space-between;
+                    align-items: center;
+
+                    div {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 2px;
+                        height: 100%;
+                    }
+                }
             }
 
             .log {
-                flex: 1;
                 display: flex;
                 flex-direction: row;
                 gap: 8px;
                 min-height: 180px;
+                margin-top: 18px;
 
                 .groupbox {
                     padding-top: 12px;
@@ -732,15 +879,16 @@ onBeforeUnmount(() => {
     .groupbox-content {
         padding-top: 5px;
         display: flex;
+        
 
         .button-area.wrap {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 12px;
+            height: 100%;
         }
 
         .button-area.wrap>* {
-            flex: 1;
             margin: 0;
         }
 
