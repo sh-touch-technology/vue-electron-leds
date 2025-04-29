@@ -23,13 +23,21 @@ const default_setting = {
     line_text_num: 8, //每行汉字数
     data_forward_or_reverse_direction: true, //数据正反向
     oe_polarity: false, //OE极性
-    dot_matrix: 32, //点阵选择
+    dot_matrix: 16, //点阵选择
+    dot_matrix_zh: 16, //综合屏点阵选择
+    dot_matrix_75e: 32, //75e点阵选择
+    background_color_75e: 1, //oe背景颜色
     com_channel_selected: 23, //信道选择
     device_type: 1, //设备类型
     screen_window_sequence_and_name: '&Y01|&Y窗口号与业务名&R称', //窗口序号和名称
     screen_initial_content: '&Y欢迎光临欢迎光临', //初始显示内容设置
     send_test_content: '请A001到01号窗&G口', //发送测试内容
-    move_effect: '0', //移动效果
+    move_effect: 0, //移动效果
+    move_effect_zh: 0, //综合屏移动效果
+    move_speed:1, //移动速度
+    flashes_num:5, //闪烁次数
+    align_type:0, //对齐方式
+    volume:11, //喇叭音量
 }
 
 //初始化存储
@@ -65,7 +73,7 @@ function saveConfig(data) {
     try {
         const config = JSON.parse(data);
         store.store = config;
-        printLog('渲染进程保存配置信息成功');
+        //printLog('渲染进程保存配置信息成功');
         return true;
     } catch (error) {
         printLog('渲染进程保存配置信息失败，错误：' + error);
@@ -122,9 +130,9 @@ function createMainWindowView() {
 
     mainWindow = new BrowserWindow({
         width: 1200,
-        height: 880,
+        height: 900,
         minWidth: 1024,
-        minHeight: 880,
+        minHeight: 900,
         x: 0,
         y: 0,
         frame: false, // 去掉窗口边框

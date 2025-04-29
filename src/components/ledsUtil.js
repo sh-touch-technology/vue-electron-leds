@@ -63,7 +63,7 @@ export function getEditWirelessControlCardChannelData(channel) {
 
 //获取 //修改设置 修改基本设置数据帧
 export function getEditBaseSettingData(setting) {
-    const { ph, xgph, hs, mhzs, zf, oe, m_sdot } = setting;
+    const { ph, xgph, hs, mhzs, zf, oe, m_sdot, m_sdot_75e, background_color_75e, device_type } = setting;
     //if (!channel) { channel = 0 };
     const adl_adh = getAdlAdh(ph);
     console.log('adl_adh', adl_adh);
@@ -80,34 +80,64 @@ export function getEditBaseSettingData(setting) {
     //每行字数mhzs，高4位和低4位
     pms.push(...getH4L4(mhzs));
 
-    // oe和zf控制的两个字节
-    if (oe) {
-        if (zf) {
-            pms.push(0x11);
+    //窗口屏、综合屏、喇叭 正反和oe控制
+    if ([1, 2, 3].includes(device_type)) {
+        // oe和zf控制的两个字节
+        if (oe) {
+            if (zf) {
+                pms.push(0x11);
+            } else {
+                pms.push(0x10);
+            }
         } else {
-            pms.push(0x10);
-        }
-    } else {
-        if (zf) {
-            pms.push(0x00);
-            pms.push(0x01);
-        } else {
-            pms.push(0x00);
-            pms.push(0x00);
+            if (zf) {
+                pms.push(0x00);
+                pms.push(0x01);
+            } else {
+                pms.push(0x00);
+                pms.push(0x00);
+            }
         }
     }
-    //m_sdot
-    let m_sdot_;
-    if (m_sdot === 16) {
-        m_sdot_ = 65;
-    } else if (m_sdot === 24) {
-        m_sdot_ = 66;
-    } else if (m_sdot === 32) {
-        m_sdot_ = 67;
-    } else {
-        m_sdot_ = 16;
+    //75e
+    else {
+        pms.push(16 + background_color_75e);
     }
-    pms.push(m_sdot_);
+
+    //窗口屏、喇叭 点阵控制
+    if (device_type === 1 || device_type === 3) {
+        //m_sdot
+        let m_sdot_;
+        if (m_sdot === 16) {
+            m_sdot_ = 65;
+        } else if (m_sdot === 24) {
+            m_sdot_ = 66;
+        } else if (m_sdot === 32) {
+            m_sdot_ = 67;
+        } else {
+            m_sdot_ = 16;
+        }
+        pms.push(m_sdot_);
+    }
+    //综合屏固定16点阵
+    else if (device_type === 2) {
+        pms.push(65);
+    }
+    //75e
+    else {
+        //m_sdot
+        let m_sdot_;
+        if (m_sdot_75e === 16) {
+            m_sdot_ = 65;
+        } else if (m_sdot_75e === 24) {
+            m_sdot_ = 66;
+        } else if (m_sdot_75e === 32) {
+            m_sdot_ = 67;
+        } else {
+            m_sdot_ = 16;
+        }
+        pms.push(m_sdot_);
+    }
     //结束符
     pms.push(26);
     const check_sum = calculateCheckSum(pms);
@@ -115,6 +145,7 @@ export function getEditBaseSettingData(setting) {
     return data;
 }
 
+//获取 //led显示内容发送 数据帧
 export function getLedContendSendData(setting) {
     // if (typeof ph !== 'number' || ph < 0 || ph > 255) {
     //     throw new Error("屏号(ph)必须是0~255之间的数字");
@@ -142,5 +173,94 @@ export function getLedContendSendData(setting) {
     const check_sum = calculateCheckSum(pms);
 
     const data = [...adl_adh, ...pms, check_sum];
+    return data;
+}
+
+//获取 //扩展设置 数据帧
+export function getExtensionSettingData(setting) {
+
+    const { ph, move_effect_zh, move_speed, flashes_num, align_type, device_type } = setting;
+    const pms = [];
+    const adl_adh = getAdlAdh(ph);
+
+    // 命令 '@'
+    pms.push('@'.charCodeAt(0));
+
+    // 结构：分隔符0x10 + 设置项字母 + 参数(ASCII)
+
+    //A移动速度
+    pms.push(0x10);
+    pms.push('A'.charCodeAt(0));
+    pms.push(move_speed + 0x30);
+
+    //B移动效果
+    if (device_type === 2) {
+        pms.push(0x10);
+        pms.push('B'.charCodeAt(0));
+        pms.push(move_effect_zh + 0x30);
+    }
+    //移动效果固定左移
+    else {
+        pms.push(0x10);
+        pms.push('B'.charCodeAt(0));
+        pms.push(0x31);
+    }
+
+    //C闪烁次数
+    pms.push(0x10);
+    pms.push('C'.charCodeAt(0));
+    pms.push(flashes_num + 0x30);
+
+    //D对齐方式
+    pms.push(0x10);
+    pms.push('D'.charCodeAt(0));
+    pms.push(align_type + 0x30);
+
+    // 结束标志
+    pms.push(0x1A);
+
+    // CRC 计算，从第3个字节开始异或
+    const check_sum = calculateCheckSum(pms);
+
+    const data = [...adl_adh, ...pms, check_sum];
+
+    return data; // 返回最终帧数组
+}
+
+//获取 //喇叭音量 数据帧
+export function getVolumeSettingData(setting) {
+    const { ph, volume } = setting;
+    const pms = [];
+    const adl_adh = getAdlAdh(ph);
+
+    // 命令 'L'
+    pms.push('L'.charCodeAt(0));
+
+    // 喇叭音量（转换为两位 ASCII）
+    if (n < 9) {
+        const n = volume;
+        let n1, n2;
+        if (n > 9) {
+            n1 = n / 10 + 0x30;
+        } else {
+            n1 = 0;
+        }
+        n2 = (n % 10) + 0x30;
+
+        pms.push(n1);
+        pms.push(n2);
+    }
+    else{
+        pms.push(...convertToAsciiAddress(volume))
+    }
+
+    // 结束标志
+    pms.push(0x1A);
+
+    // CRC 计算，从第3个字节开始异或
+    const check_sum = calculateCheckSum(pms);
+
+    const data = [...adl_adh, ...pms, check_sum];
+
     return data;
 }
