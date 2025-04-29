@@ -6,7 +6,7 @@ const { releaseSerialPort } = require('./serial');
 //const os = require('os');
 
 //发布时改为非dev的值
-const env = 'dev';
+const env = 'dev11';
 
 //运行平台win32/linux
 //const platform = os.platform();
@@ -34,10 +34,10 @@ const default_setting = {
     send_test_content: '请A001到01号窗&G口', //发送测试内容
     move_effect: 0, //移动效果
     move_effect_zh: 0, //综合屏移动效果
-    move_speed:1, //移动速度
-    flashes_num:5, //闪烁次数
-    align_type:0, //对齐方式
-    volume:11, //喇叭音量
+    move_speed: 1, //移动速度
+    flashes_num: 5, //闪烁次数
+    align_type: 0, //对齐方式
+    volume: 11, //喇叭音量
 }
 
 //初始化存储
@@ -125,26 +125,59 @@ function exitMainwindow() {
     app.quit();
 }
 
+const windowOptions = {
+    width: 1200,
+    height: 900,
+    minWidth: 1024,
+    minHeight: 900,
+    frame: false, // 去掉窗口边框
+    center: true,
+    titleBarStyle: 'hidden', // 隐藏标题栏
+    icon: path.join(__dirname, 'build','icons','icon.png'),
+    webPreferences: {
+        preload: path.join(__dirname, '/preload.js'),
+        //渲染进程配置
+        nodeIntegration: false, //可以引入node和electron相关的API
+        contextIsolation: true, //可以使用require方法
+        enableRemoteModule: false, //可以使用remote方法
+    },
+}
+
+/**
+ * @description: 加载等待页面，解决主窗口白屏问题
+ * @param {Object} windowOptions 主窗口配置
+ * @return {Void}
+ */
+function loadingView(windowOptions) {
+    const loadingBrowserView = new BrowserView();
+    mainWindow.setBrowserView(loadingBrowserView);
+    loadingBrowserView.setBounds({
+        x: 0,
+        y: 0,
+        width: windowOptions.width,
+        height: windowOptions.height,
+    });
+
+    const loadingHtml = path.join(
+        "file://",
+        app.getAppPath(),
+        "assets/loading.html",
+    );
+    loadingBrowserView.webContents.loadURL(loadingHtml);
+
+    // 主窗口 dom 加载完毕，移除 loadingBrowserView
+    mainWindow.webContents.on("dom-ready", async (event) => {
+        mainWindow.removeBrowserView(loadingBrowserView);
+    });
+}
+
 
 function createMainWindowView() {
 
-    mainWindow = new BrowserWindow({
-        width: 1200,
-        height: 900,
-        minWidth: 1024,
-        minHeight: 900,
-        x: 0,
-        y: 0,
-        frame: false, // 去掉窗口边框
-        titleBarStyle: 'hidden', // 隐藏标题栏
-        webPreferences: {
-            preload: path.join(__dirname, '/preload.js'),
-            //渲染进程配置
-            nodeIntegration: false, //可以引入node和electron相关的API
-            contextIsolation: true, //可以使用require方法
-            enableRemoteModule: false, //可以使用remote方法
-        },
-    });
+    mainWindow = new BrowserWindow(windowOptions);
+
+    // 添加加载页面 解决白屏的问题
+    loadingView(windowOptions);
 
     // 配置热更新
     if (env == 'dev') {

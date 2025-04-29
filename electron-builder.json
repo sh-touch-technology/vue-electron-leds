@@ -1,15 +1,17 @@
 {
     "productName": "首环条屏设置",
     "files": [
-        "./electron/main.js",
-        "./dist"
+        "./electron",
+        "./dist",
+        "./assets",
+        "./build"
     ],
     "extraFiles": [
         "./videos",
         "./cvideo"
     ],
     "directories": {
-        "output": "./buileder"
+        "output": "./builder"
     },
     "win":{
         "target":[
@@ -21,7 +23,7 @@
                 ]
             }
         ],
-        "icon": "public/logo.png"
+        "icon": "build/icons/icon.ico"
     },
     "linux": {
         "target": [
@@ -33,6 +35,6 @@
                 ]
             }
         ],
-        "icon": "public/logo.png"
+        "icon": "build/icons"
     }
 }

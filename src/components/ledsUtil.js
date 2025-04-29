@@ -63,7 +63,18 @@ export function getEditWirelessControlCardChannelData(channel) {
 
 //获取 //修改设置 修改基本设置数据帧
 export function getEditBaseSettingData(setting) {
-    const { ph, xgph, hs, mhzs, zf, oe, m_sdot, m_sdot_75e, background_color_75e, device_type } = setting;
+    const {
+        ph = 255,
+        xgph = 255,
+        hs = 1,
+        mhzs = 8,
+        zf = true,
+        oe = false,
+        m_sdot = 16,
+        m_sdot_75e = 32,
+        background_color_75e = 1,
+        device_type = 1
+    } = setting;
     //if (!channel) { channel = 0 };
     const adl_adh = getAdlAdh(ph);
     console.log('adl_adh', adl_adh);
@@ -156,7 +167,11 @@ export function getLedContendSendData(setting) {
     // if (typeof text !== 'string' || text.length === 0) {
     //     throw new Error("文本内容不能为空");
     // }
-    const { ph, encodeArray, cmd } = setting;
+    const {
+        ph = 255,
+        encodeArray,
+        cmd
+    } = setting;
 
     const pms = [];
     const adl_adh = getAdlAdh(ph);
@@ -179,7 +194,14 @@ export function getLedContendSendData(setting) {
 //获取 //扩展设置 数据帧
 export function getExtensionSettingData(setting) {
 
-    const { ph, move_effect_zh, move_speed, flashes_num, align_type, device_type } = setting;
+    const {
+        ph = 255,
+        move_effect_zh = 0,
+        move_speed = 1,
+        flashes_num = 5,
+        align_type = 0,
+        device_type = 1
+    } = setting;
     const pms = [];
     const adl_adh = getAdlAdh(ph);
 
@@ -229,7 +251,10 @@ export function getExtensionSettingData(setting) {
 
 //获取 //喇叭音量 数据帧
 export function getVolumeSettingData(setting) {
-    const { ph, volume } = setting;
+    const {
+        ph = 255,
+        volume = 11
+    } = setting;
     const pms = [];
     const adl_adh = getAdlAdh(ph);
 
@@ -250,7 +275,7 @@ export function getVolumeSettingData(setting) {
         pms.push(n1);
         pms.push(n2);
     }
-    else{
+    else {
         pms.push(...convertToAsciiAddress(volume))
     }
 
