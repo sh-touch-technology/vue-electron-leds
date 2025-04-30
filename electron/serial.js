@@ -1,5 +1,7 @@
-//const SerialPort = require('serialport');
-const { SerialPort } = require('serialport');
+//const { SerialPort } = require('serialport');
+const SerialPort = require('@serialport/stream');
+const Binding = require('@serialport/bindings');
+SerialPort.Binding = Binding;
 const { printLog } = require('./utils');
 
 //electron-log日志实例
