@@ -1,10 +1,7 @@
-//const { SerialPort } = require('serialport');
-const SerialPort = require('@serialport/stream');
-const Binding = require('@serialport/bindings');
-SerialPort.Binding = Binding;
+const { SerialPort } = require('serialport');
 const { printLog } = require('./utils');
 
-//electron-log日志实例
+//是否打印调试日志
 const logs = true;
 
 //保存串口实例
@@ -22,11 +19,17 @@ function openSerialPort(com, view) {
         view.webContents.send('serial-data', { type: 'com-state-message', flag: 'error', msg: '指定的串口名称无效' });
         return;
     }
-    port = new SerialPort({
-        path: com,            // 串口路径
-        baudRate: 9600,       // 波特率
-        autoOpen: false       // 不自动打开
-    });
+    try {
+        port = new SerialPort({
+            path: com,            // 串口路径
+            baudRate: 9600,       // 波特率
+            autoOpen: false       // 不自动打开
+        });
+    }
+    catch (err) {
+        view.webContents.send('serial-data', { type: 'com-state-message', flag: 'error', msg: '串口打开失败：' + err.message });
+        return logs && console.error('打开串口失败:', err.message);
+    }
     // 3. 打开串口
     port.open(err => {
         if (err) {

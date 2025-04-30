@@ -1,5 +1,5 @@
 {
-    "productName": "首环条屏设置",
+    "productName": "shled",
     "files": [
         "./electron",
         "./dist",
