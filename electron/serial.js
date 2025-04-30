@@ -1,7 +1,7 @@
 //const { SerialPort } = require('serialport');
 const { SerialPortStream } = require('@serialport/stream')
-const { autoDetect } = require('@serialport/bindings-cpp')
-const Binding = autoDetect()
+const Binding = require('@serialport/bindings');
+
 const { printLog } = require('./utils');
 
 //是否打印调试日志
@@ -24,7 +24,7 @@ function openSerialPort(com, view) {
     }
     try {
         port = new SerialPortStream({
-            binding: Binding,// ← 这是关键
+            binding: new Binding(),// ← 这是关键
             path: com,            // 串口路径
             baudRate: 9600,       // 波特率
             autoOpen: false       // 不自动打开
