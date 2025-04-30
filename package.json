@@ -10,7 +10,6 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "rebuild": "electron-rebuild -f -w @serialport/bindings-cpp",
     "preview": "vite preview",
     "electron:dev": "electron .",
     "electron:win-build": "vite build & electron-builder build --config electron-builder.json",
@@ -39,8 +38,5 @@
     "sass-loader": "^14.2.1",
     "terser": "^5.28.1",
     "vite": "^5.0.11"
-  },
-  "build": {
-    "buildDependenciesFromSource": true
   }
 }
