@@ -22,41 +22,27 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      # Windows 专用构建支持
-      - name: 2.1 安装 Python
-        if: matrix.os == 'windows-latest'
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
+      - name: 3. 安装依赖（强制从源码构建）
+        run: npm install
+        env:
+          npm_config_build_from_source: true
 
-      - name: 2.2 安装 MSBuild
-        if: matrix.os == 'windows-latest'
-        uses: microsoft/setup-msbuild@v1.3.1
-
-      # 重要：先安装依赖，但跳过 preinstall 脚本（避免触发 node-gyp-build）
-      - name: 3. 安装依赖（跳过 node-gyp-build）
-        run: npm install --ignore-scripts
-
-      # 然后手动 rebuild serialport
-      - name: 3.1 重新构建 serialport 模块
-        if: matrix.os == 'windows-latest'
+      - name: 4. electron-rebuild 修复原生模块
         run: npx electron-rebuild -f -w @serialport/bindings-cpp
 
-      - name: 4. Linux 打包
+      - name: 5. 为 Linux 平台打包
         if: matrix.os == 'ubuntu-latest'
-        run: |
-          npm run electron:linux-build --linux
+        run: npm run electron:linux-build
         env:
           GH_TOKEN: ${{ secrets.SHKJ_DEMO_RELEASE_TOKEN }}
 
-      - name: 4. Windows 打包
+      - name: 5. 为 Windows 平台打包
         if: matrix.os == 'windows-latest'
-        run: |
-          npm run electron:win-build --win
+        run: npm run electron:win-build
         env:
           GH_TOKEN: ${{ secrets.SHKJ_DEMO_RELEASE_TOKEN }}
 
-      - name: 5. 创建 Release 草稿
+      - name: 6. 创建 Release 草稿
         run: gh release create ${{ github.ref_name }} --draft
         env:
           GH_TOKEN: ${{ secrets.SHKJ_DEMO_RELEASE_TOKEN }}
