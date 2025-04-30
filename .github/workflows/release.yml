@@ -47,19 +47,19 @@ jobs:
         run: |
           npm run electron:linux-build --linux
         env:
-          GH_TOKEN: ${{ secrets.SHKJ_CLIENT_RELEASE_TOKEN }}
+          GH_TOKEN: ${{ secrets.SHKJ_DEMO_RELEASE_TOKEN }}
 
       - name: 4. Windows 打包
         if: matrix.os == 'windows-latest'
         run: |
           npm run electron:win-build --win
         env:
-          GH_TOKEN: ${{ secrets.SHKJ_CLIENT_RELEASE_TOKEN }}
+          GH_TOKEN: ${{ secrets.SHKJ_DEMO_RELEASE_TOKEN }}
 
       - name: 5. 创建 Release 草稿
         run: gh release create ${{ github.ref_name }} --draft
         env:
-          GH_TOKEN: ${{ secrets.SHKJ_CLIENT_RELEASE_TOKEN }}
+          GH_TOKEN: ${{ secrets.SHKJ_DEMO_RELEASE_TOKEN }}
 
   release:
     needs: build
@@ -71,4 +71,4 @@ jobs:
       - name: 2. 发布正式 Release
         run: gh release edit ${{ github.ref_name }} --draft=false
         env:
-          GH_TOKEN: ${{ secrets.SHKJ_CLIENT_RELEASE_TOKEN }}
+          GH_TOKEN: ${{ secrets.SHKJ_DEMO_RELEASE_TOKEN }}
