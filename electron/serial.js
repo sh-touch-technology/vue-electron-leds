@@ -1,6 +1,4 @@
-//const { SerialPort } = require('serialport');
-const { SerialPortStream } = require('@serialport/stream')
-const Binding = require('@serialport/bindings');
+const { SerialPort } = require('serialport');
 
 const { printLog } = require('./utils');
 
@@ -23,8 +21,7 @@ function openSerialPort(com, view) {
         return;
     }
     try {
-        port = new SerialPortStream({
-            binding: new Binding(),// ← 这是关键
+        port = new SerialPort({
             path: com,            // 串口路径
             baudRate: 9600,       // 波特率
             autoOpen: false       // 不自动打开
@@ -109,7 +106,7 @@ function sendSerialPortMessage(dataArray, view) {
 //获取系统串口列表
 async function getSerialPortList(view) {
     try {
-        const ports = await Binding.list();  // 获取所有串口列表
+        const ports = await SerialPort.list();  // 获取所有串口列表
         if (ports.length === 0) {
             printLog(`[获取串口列表]设备上没有可用的串口`);
             logs && console.log('没有找到可用的串口');
