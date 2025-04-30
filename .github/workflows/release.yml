@@ -22,34 +22,34 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      # ✅ 添加构建工具（只在 Windows 下执行）
-      - name: 2.1 安装 Windows 构建工具
-        if: matrix.os == 'windows-latest'
-        run: |
-          npm install -g node-gyp
-        shell: cmd
-
-      - name: 2.2 安装 Python 和 MSBuild（用于 node-gyp）
+      # Windows 专用构建支持
+      - name: 2.1 安装 Python
         if: matrix.os == 'windows-latest'
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
-      - name: 2.3 安装 MSBuild
+      - name: 2.2 安装 MSBuild
         if: matrix.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v1.3.1
 
-      - name: 3. 安装依赖
-        run: npm install
+      # 重要：先安装依赖，但跳过 preinstall 脚本（避免触发 node-gyp-build）
+      - name: 3. 安装依赖（跳过 node-gyp-build）
+        run: npm install --ignore-scripts
 
-      - name: 4. 为 Linux 平台单独打包
+      # 然后手动 rebuild serialport
+      - name: 3.1 重新构建 serialport 模块
+        if: matrix.os == 'windows-latest'
+        run: npx electron-rebuild -f -w @serialport/bindings-cpp
+
+      - name: 4. Linux 打包
         if: matrix.os == 'ubuntu-latest'
         run: |
           npm run electron:linux-build --linux
         env:
           GH_TOKEN: ${{ secrets.SHKJ_CLIENT_RELEASE_TOKEN }}
 
-      - name: 4. 为 Windows 平台单独打包
+      - name: 4. Windows 打包
         if: matrix.os == 'windows-latest'
         run: |
           npm run electron:win-build --win
