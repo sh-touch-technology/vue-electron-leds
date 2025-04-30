@@ -6,7 +6,7 @@ const { releaseSerialPort } = require('./serial');
 //const os = require('os');
 
 //发布时改为非dev的值
-const env = 'dev11';
+const env = 'dev111';
 
 //运行平台win32/linux
 //const platform = os.platform();
