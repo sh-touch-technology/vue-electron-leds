@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'linux-arm-*'
+      - 'linux-*'
 
 jobs:
   build:
