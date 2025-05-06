@@ -11,6 +11,19 @@
       </div>
     </template>
   </el-dialog>
+
+  <el-dialog v-model="error_visible" :title="error_title" top="35vh" width="500px" @close="handleClose" class="confirm">
+    <div class="warning">
+      <el-alert :title="error_message" type="error" :closable="false" show-icon>
+      </el-alert>
+    </div>
+    <template #footer>
+      <div class="foot">
+        <el-button @click="error_visible = false" style="width: 100px;height: 35px;">取消</el-button>
+        <el-button type="primary" @click="error_visible = false" style="width: 100px;height: 35px;">确认</el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
@@ -19,6 +32,10 @@ import { ref } from 'vue'
 const visible = ref(false)
 const title = ref('提示')
 const message = ref('确定要执行该操作吗？')
+
+const error_visible = ref(false)
+const error_title = ref('错误')
+const error_message = ref('出现了一个错误')
 
 let resolveCallback = null
 
@@ -31,6 +48,13 @@ const openConfirm = (options = {}) => {
   return new Promise((resolve) => {
     resolveCallback = resolve
   })
+}
+
+// 打开错误提示对话框
+const openError = (options = {}) => {
+  error_title.value = options.title || '错误'
+  error_message.value = options.message || '出现了一个错误'
+  error_visible.value = true
 }
 
 const handleConfirm = () => {
@@ -51,7 +75,7 @@ const handleClose = () => {
 }
 
 defineExpose({
-  openConfirm
+  openConfirm, openError
 })
 </script>
 

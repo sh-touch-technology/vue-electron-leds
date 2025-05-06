@@ -97,9 +97,9 @@ function sendSerialPortMessage(dataArray, view) {
             logs && console.error('发送失败：', err.message);
             view.webContents.send('serial-data', { type: 'com-state-message', flag: 'error', msg: '发送失败：' + err.message });
         }
-        const data_info = dataArray.join(' ') + ` (${dataArray.map(num => num.toString(16).padStart(2, '0').toUpperCase()).join(' ')})`;
+        const data_info = `${dataArray.map(num => num.toString(16).padStart(2, '0').toUpperCase()).join(' ')} 十进制(${dataArray.join(' ')})`;
         printLog(`[串口发送]${data_info}`);
-        view.webContents.send('serial-data', { type: 'com-state-message', flag: 'debug', msg: '串口发送：' + data_info });
+        view.webContents.send('serial-data', { type: 'com-state-message', flag: 'success', msg: '发送完成'});
     });
 }
 

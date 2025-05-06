@@ -91,7 +91,7 @@ export function getEditBaseSettingData(setting) {
     //每行字数mhzs，高4位和低4位
     pms.push(...getH4L4(mhzs));
 
-    //窗口屏、综合屏、喇叭 正反和oe控制
+    /* //窗口屏、综合屏、喇叭 正反和oe控制
     if ([1, 2, 3].includes(device_type)) {
         // oe和zf控制的两个字节
         if (oe) {
@@ -113,6 +113,23 @@ export function getEditBaseSettingData(setting) {
     //75e
     else {
         pms.push(16 + background_color_75e);
+    } */
+
+    // oe和zf控制的两个字节
+    if (oe) {
+        if (zf) {
+            pms.push(0x11);
+        } else {
+            pms.push(0x10);
+        }
+    } else {
+        if (zf) {
+            pms.push(0x00);
+            pms.push(0x01);
+        } else {
+            pms.push(0x00);
+            pms.push(0x00);
+        }
     }
 
     //窗口屏、喇叭 点阵控制
@@ -225,7 +242,7 @@ export function getExtensionSettingData(setting) {
     else {
         pms.push(0x10);
         pms.push('B'.charCodeAt(0));
-        pms.push(0x31);
+        pms.push(0x33);
     }
 
     //C闪烁次数
@@ -262,15 +279,14 @@ export function getVolumeSettingData(setting) {
     pms.push('L'.charCodeAt(0));
 
     // 喇叭音量（转换为两位 ASCII）
-    if (n < 9) {
-        const n = volume;
+    if (volume < 9) {
         let n1, n2;
-        if (n > 9) {
-            n1 = n / 10 + 0x30;
+        if (volume > 9) {
+            n1 = volume / 10 + 0x30;
         } else {
             n1 = 0;
         }
-        n2 = (n % 10) + 0x30;
+        n2 = (volume % 10) + 0x30;
 
         pms.push(n1);
         pms.push(n2);
