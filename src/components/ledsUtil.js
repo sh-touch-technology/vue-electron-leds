@@ -91,7 +91,7 @@ export function getEditBaseSettingData(setting) {
     //每行字数mhzs，高4位和低4位
     pms.push(...getH4L4(mhzs));
 
-    /* //窗口屏、综合屏、喇叭 正反和oe控制
+    //窗口屏、综合屏、喇叭 正反和oe控制
     if ([1, 2, 3].includes(device_type)) {
         // oe和zf控制的两个字节
         if (oe) {
@@ -112,23 +112,12 @@ export function getEditBaseSettingData(setting) {
     }
     //75e
     else {
-        pms.push(16 + background_color_75e);
-    } */
-
-    // oe和zf控制的两个字节
-    if (oe) {
-        if (zf) {
-            pms.push(0x11);
-        } else {
-            pms.push(0x10);
+        if (oe){
+            pms.push(16 + background_color_75e);
         }
-    } else {
-        if (zf) {
-            pms.push(0x00);
-            pms.push(0x01);
-        } else {
-            pms.push(0x00);
-            pms.push(0x00);
+        else{
+            pms.push(0);
+            pms.push(background_color_75e);
         }
     }
 
