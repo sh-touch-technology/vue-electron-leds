@@ -41,14 +41,20 @@ function openSerialPort(com, view) {
         printLog(`[打开串口]port:${com}`);
         logs && console.log('串口已打开');
         view.webContents.send('serial-data', { type: 'com-port-open', flag: 'success', msg: '串口已打开' });
+    });
 
-        // 监听串口数据
-        port.on('data', data => {
-            const data_info = Array.from(data) + `(${Array.from(data).map(num => num.toString(16).padStart(2, '0').toUpperCase()).join(' ')})`
-            printLog(`[串口接收]${data_info}`);
-            //logs && console.log('接收到的数据字节:', Array.from(data));  // 打印接收到的字节数据
-            view.webContents.send('serial-message', Array.from(data)); // 发送到界面
-        });
+    // 监听串口数据
+    port.on('data', data => {
+        const data_info = Array.from(data) + `(${Array.from(data).map(num => num.toString(16).padStart(2, '0').toUpperCase()).join(' ')})`
+        printLog(`[串口接收]${data_info}`);
+        //logs && console.log('接收到的数据字节:', Array.from(data));  // 打印接收到的字节数据
+        view.webContents.send('serial-message', Array.from(data)); // 发送到界面
+    });
+
+    port.on('close', () => {
+        printLog(`[串口断开]串口已断开连接`);
+        logs && console.log('串口已断开连接');
+        view.webContents.send('serial-data', { type: 'com-port-disconnected', flag: 'warning', msg: '串口已断开连接' });
     });
 
     // 6. 错误处理
@@ -99,7 +105,7 @@ function sendSerialPortMessage(dataArray, view) {
         }
         const data_info = `${dataArray.map(num => num.toString(16).padStart(2, '0').toUpperCase()).join(' ')} 十进制(${dataArray.join(' ')})`;
         printLog(`[串口发送]${data_info}`);
-        view.webContents.send('serial-data', { type: 'com-state-message', flag: 'success', msg: '发送完成'});
+        view.webContents.send('serial-data', { type: 'com-state-message', flag: 'success', msg: '发送完成' });
     });
 }
 

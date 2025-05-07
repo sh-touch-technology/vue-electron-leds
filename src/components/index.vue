@@ -249,16 +249,17 @@
                             style="height: 100%;display: flex;">
                             <el-input v-model="data.screen_window_sequence_and_name" :rows="2" type="textarea"
                                 style="flex: 1;height: 100%;" resize="none" :spellcheck="false" autocomplete="off"
-                                maxlength="50" show-word-limit v-if="[1,4].includes(data.device_type)"/>
+                                maxlength="50" show-word-limit v-if="[1, 4].includes(data.device_type)" />
                             <el-button type="primary" plain
-                                @click="ledContentSend(data.screen_window_sequence_and_name, 'W')" v-if="[1,4].includes(data.device_type)">
+                                @click="ledContentSend(data.screen_window_sequence_and_name, 'W')"
+                                v-if="[1, 4].includes(data.device_type)">
                                 设置窗口序号和名称
                             </el-button>
                             <el-input v-model="data.screen_initial_content" :rows="2" type="textarea"
                                 style="flex: 1;height: 100%;" resize="none" :spellcheck="false" autocomplete="off"
-                                maxlength="50" show-word-limit v-if="data.device_type!==3"/>
-                            <el-button type="primary" plain
-                                @click="ledContentSend(data.screen_initial_content, 'S')" v-if="data.device_type!==3">
+                                maxlength="50" show-word-limit v-if="data.device_type !== 3" />
+                            <el-button type="primary" plain @click="ledContentSend(data.screen_initial_content, 'S')"
+                                v-if="data.device_type !== 3">
                                 设置初始显示内容
                             </el-button>
                         </div>
@@ -964,7 +965,7 @@ const handleLineNumInput = debounce((input) => {
         return;
     }
     const number = parseInt(numValue);
-    if (number>0 && number<=12) {
+    if (number > 0 && number <= 12) {
         data.value.line_num = number;
         return;
     }
@@ -1024,10 +1025,15 @@ const comPortSelectChange = () => {
     }, 500);
 }
 
+//判断是否为数字
+const isValidNumber = (val) => {
+    return typeof val === 'number' && !isNaN(val);
+}
+
 onMounted(() => {
     log('程序启动');
 
-    // 监听串口返回消息
+    // 启动监听 串口返回消息
     cleanupFns.push(
         window.electron.onSerialData((obj) => {
             switch (obj.type) {
@@ -1035,16 +1041,6 @@ onMounted(() => {
                 case 'com_port_list':
                     com_port_list.value = obj.data;
                     log(`串口列表获取成功 ${com_port_list.value.length}个串口`, 'success');
-                    //未选择串口的情况下，自动选择一个串口
-                    if (com_port_list.value.length > 0 && !data.value.com_port_selected) {
-                        data.value.com_port_selected = com_port_list.value[0].port;
-                    }
-                    setTimeout(() => {
-                        if (com_port_list.value.length > 0) {
-                            //自动开始监听串口
-                            openSerialPort();
-                        }
-                    }, 800);
                     break;
                 //接收到串口打开
                 case 'com-port-open':
@@ -1055,6 +1051,11 @@ onMounted(() => {
                 case 'com-port-release':
                     com_state.value = false;
                     log(`串口释放`, 'primary');
+                    break;
+                //接收到串口释放
+                case 'com-port-disconnected':
+                    com_state.value = false;
+                    log(`串口断开`, 'warning');
                     break;
                 //接收到串口状态消息
                 case 'com-state-message':
@@ -1080,11 +1081,7 @@ onMounted(() => {
         })
     );
 
-    const isValidNumber = (val) => {
-        return typeof val === 'number' && !isNaN(val);
-    }
-
-    // 监听串口监听接收数据
+    // 启动监听 串口监听接收数据
     cleanupFns.push(
         window.electron.onSerialMessage((frame) => {
             log(`串口接收：${frame.map(num => num.toString(16).padStart(2, '0').toUpperCase()).join(' ')} 十进制(${frame.join(' ')})`, 'debug');
@@ -1101,14 +1098,27 @@ onMounted(() => {
                 }
                 log('与主控通信失败：主控返回数据帧校验失败', 'error');
             }
-            else{
-                if(mainControlDataReturnTimer.value){
+            else {
+                if (mainControlDataReturnTimer.value) {
                     log('主控返回数据帧校验失败', 'error');
                 }
             }
         })
     );
+
+    //启动时自动获取串口列表
     getSerialPortList();
+
+    //等待串口列表获取完成，并自动打开串口
+    setTimeout(() => {
+        if (com_port_list.value.length > 0 && !data.value.com_port_selected) {
+            data.value.com_port_selected = com_port_list.value[0].port;
+        }
+        if (data.value.com_port_selected) {
+            //自动开始监听串口
+            openSerialPort();
+        }
+    }, 1000);
 });
 
 onBeforeUnmount(() => {
