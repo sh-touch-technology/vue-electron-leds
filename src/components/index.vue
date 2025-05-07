@@ -79,11 +79,11 @@
                             <el-select v-model="data.line_num" filterable style="flex: 1;"
                                 :popper-options="popper_options" :filter-method="handleLineNumInput" placeholder="行数："
                                 v-if="data.device_type !== 3">
-                                <el-option :key="1" :label="1" :value="1">
-                                    <span style="">1</span>
-                                </el-option>
-                                <el-option :key="2" :label="2" :value="2">
-                                    <span style="">2</span>
+                                <el-option
+                                    v-for="screen in (data.device_type === 2 ? Array.from({ length: 12 }, (_, i) => i + 1) : [1, 2])"
+                                    :key="screen" :label="screen" :value="screen"
+                                    style="display: flex;flex-direction: row;justify-content: space-between;">
+                                    <span style="">{{ screen }}</span>
                                 </el-option>
                                 <template #label>
                                     <span class="selector-selected" :style="computeSelectStyle(data.line_num)">
@@ -249,14 +249,18 @@
                             style="height: 100%;display: flex;">
                             <el-input v-model="data.screen_window_sequence_and_name" :rows="2" type="textarea"
                                 style="flex: 1;height: 100%;" resize="none" :spellcheck="false" autocomplete="off"
-                                maxlength="50" show-word-limit />
+                                maxlength="50" show-word-limit v-if="[1,4].includes(data.device_type)"/>
                             <el-button type="primary" plain
-                                @click="ledContentSend(data.screen_window_sequence_and_name, 'W')">设置窗口序号和名称</el-button>
+                                @click="ledContentSend(data.screen_window_sequence_and_name, 'W')" v-if="[1,4].includes(data.device_type)">
+                                设置窗口序号和名称
+                            </el-button>
                             <el-input v-model="data.screen_initial_content" :rows="2" type="textarea"
                                 style="flex: 1;height: 100%;" resize="none" :spellcheck="false" autocomplete="off"
-                                maxlength="50" show-word-limit />
+                                maxlength="50" show-word-limit v-if="data.device_type!==3"/>
                             <el-button type="primary" plain
-                                @click="ledContentSend(data.screen_initial_content, 'S')">设置初始显示内容</el-button>
+                                @click="ledContentSend(data.screen_initial_content, 'S')" v-if="data.device_type!==3">
+                                设置初始显示内容
+                            </el-button>
                         </div>
                     </div>
                     <!-- 扩展设置 -->
@@ -960,11 +964,11 @@ const handleLineNumInput = debounce((input) => {
         return;
     }
     const number = parseInt(numValue);
-    if (number === 1 || number == 2) {
+    if (number>0 && number<=12) {
         data.value.line_num = number;
         return;
     }
-    log('输入数值不正确，行数取值范围1-2', 'warning');
+    log('输入数值不正确，行数取值范围1-12', 'warning');
 }, 800);
 
 //每行汉字数输入处理
@@ -1096,6 +1100,11 @@ onMounted(() => {
                     return;
                 }
                 log('与主控通信失败：主控返回数据帧校验失败', 'error');
+            }
+            else{
+                if(mainControlDataReturnTimer.value){
+                    log('主控返回数据帧校验失败', 'error');
+                }
             }
         })
     );

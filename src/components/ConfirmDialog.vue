@@ -14,10 +14,8 @@
 
   <el-dialog v-model="error_visible" :title="error_title" top="35vh" width="550px" @close="handleClose" class="confirm">
     <div class="warning">
-      <el-alert :title="error_message" type="error" :closable="false" show-icon>
-      </el-alert>
-      <el-alert :title="code" type="warning" :closable="false" v-if="code" style="margin-top: 10px;"
-      </el-alert>
+      <el-alert :title="error_message" type="error" :closable="false" show-icon></el-alert>
+      <el-alert :title="code" type="warning" :closable="false" v-if="code" style="margin-top: 10px;"></el-alert>
     </div>
     <template #footer>
       <div class="foot">
