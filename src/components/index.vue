@@ -48,7 +48,7 @@
                             { label: '窗口屏', value: 1 },
                             { label: '综合屏', value: 2 },
                             { label: '喇叭', value: 3 },
-                            { label: '75E接口窗口屏', value: 4 }]" @change="" />
+                            { label: '75E接口窗口屏', value: 4 }]" @change="" style="width: 100%"/>
                     </div>
                 </div>
 
@@ -1057,6 +1057,13 @@ onMounted(() => {
                         confirmRef.value.openError({
                             title: '提示',
                             message: '串口被占用或不存在！请更改串口！',
+                        })
+                    }
+                    if (obj.msg.includes('权限')) {
+                        confirmRef.value.openError({
+                            title: '提示',
+                            message: '权限不足，请在终端运行以下命令，将当前用户添加到dialout用户组',
+                            code: 'sudo usermod -aG dialout 用户名'
                         })
                     }
                     break;

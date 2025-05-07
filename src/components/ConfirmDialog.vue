@@ -12,9 +12,11 @@
     </template>
   </el-dialog>
 
-  <el-dialog v-model="error_visible" :title="error_title" top="35vh" width="500px" @close="handleClose" class="confirm">
+  <el-dialog v-model="error_visible" :title="error_title" top="35vh" width="550px" @close="handleClose" class="confirm">
     <div class="warning">
       <el-alert :title="error_message" type="error" :closable="false" show-icon>
+      </el-alert>
+      <el-alert :title="code" type="warning" :closable="false" v-if="code" style="margin-top: 10px;"
       </el-alert>
     </div>
     <template #footer>
@@ -36,6 +38,7 @@ const message = ref('确定要执行该操作吗？')
 const error_visible = ref(false)
 const error_title = ref('错误')
 const error_message = ref('出现了一个错误')
+const code = ref(null)
 
 let resolveCallback = null
 
@@ -52,6 +55,11 @@ const openConfirm = (options = {}) => {
 
 // 打开错误提示对话框
 const openError = (options = {}) => {
+  if (options.code) {
+    code.value = '运行命令：'+options.code;
+  } else {
+    code.value = null;
+  }
   error_title.value = options.title || '错误'
   error_message.value = options.message || '出现了一个错误'
   error_visible.value = true
