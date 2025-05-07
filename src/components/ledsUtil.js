@@ -52,12 +52,21 @@ export function getEditMainControlData(channel) {
 }
 
 //获取 //无线控制卡 批量信道修改数据帧
-export function getEditWirelessControlCardChannelData(channel) {
-    if (!channel) { channel = 0 };
-    const ascaii_addr = convertToAsciiAddress(channel);
-    const pms = [67, ...ascaii_addr, 26];
+export function getEditWirelessControlCardChannelData(channel, screen) {
+    if (!channel) { channel = 0 }
+    if (!screen) { screen = 0 }
+    const pms = [67];
+    // 信道（转换为两位 ASCII）
+    if (channel < 9) {
+        pms.push(0);
+        pms.push((channel % 10) + 0x30);
+    }
+    else {
+        pms.push(...convertToAsciiAddress(channel))
+    }
+    pms.push(26)
     const check_sum = calculateCheckSum(pms);
-    const data = [191, 195, ...pms, check_sum];
+    const data = [...getAdlAdh(screen), ...pms, check_sum];
     return data;
 }
 
@@ -112,10 +121,10 @@ export function getEditBaseSettingData(setting) {
     }
     //75e
     else {
-        if (oe){
+        if (oe) {
             pms.push(16 + background_color_75e);
         }
-        else{
+        else {
             pms.push(0);
             pms.push(background_color_75e);
         }

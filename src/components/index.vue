@@ -48,7 +48,7 @@
                             { label: '窗口屏', value: 1 },
                             { label: '综合屏', value: 2 },
                             { label: '喇叭', value: 3 },
-                            { label: '75E接口窗口屏', value: 4 }]" @change="" style="width: 100%"/>
+                            { label: '75E接口窗口屏', value: 4 }]" @change="" style="width: 100%" />
                     </div>
                 </div>
 
@@ -619,11 +619,13 @@ const readMainControl = () => {
 //无线控制卡
 const wirelessControlCard = async () => {
 
-    const result = await confirmRef.value.openConfirm({
-        title: '提示',
-        message: '确定将所有的控制卡修改成新的信道吗？',
-    })
-    if (!result) { log('操作取消', 'warning'); return; }
+    if (data.value.screen_selected === 0) {
+        const result = await confirmRef.value.openConfirm({
+            title: '提示',
+            message: '确定将所有的控制卡修改成新的信道吗？',
+        })
+        if (!result) { log('操作取消', 'warning'); return; }
+    }
 
     log('无线控制卡');
 
@@ -631,7 +633,7 @@ const wirelessControlCard = async () => {
         log('串口未打开，请先打开串口！', 'error');
         return;
     }
-    const frame = ledsUtil.getEditWirelessControlCardChannelData(data.value.com_channel_selected);
+    const frame = ledsUtil.getEditWirelessControlCardChannelData(data.value.com_channel_selected, data.value.screen_selected);
     sendSerialPortMessage(frame);
 }
 
