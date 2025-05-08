@@ -600,7 +600,7 @@ const editMainControl = () => {
     }
     mainControlDataReturnTimer.value = setTimeout(() => {
         log('与主控通信失败：返回数据超时', 'error')
-    }, 2000);
+    }, 1000);
 }
 
 //主控读取
@@ -618,7 +618,7 @@ const readMainControl = () => {
     }
     mainControlDataReturnTimer.value = setTimeout(() => {
         log('与主控通信失败：返回数据超时', 'error')
-    }, 2000);
+    }, 1000);
 }
 
 //无线控制卡
@@ -1040,7 +1040,7 @@ onMounted(() => {
                 //接收到串口列表
                 case 'com_port_list':
                     com_port_list.value = obj.data;
-                    log(`串口列表获取成功 ${com_port_list.value.length}个串口`, 'success');
+                    log(`串口列表获取成功 ${com_port_list.value.length}个端口`, 'success');
                     break;
                 //接收到串口打开
                 case 'com-port-open':

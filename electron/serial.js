@@ -1,4 +1,5 @@
 const { SerialPort } = require('serialport');
+const { InterByteTimeoutParser } = require('@serialport/parser-inter-byte-timeout')
 
 const { printLog } = require('./utils');
 
@@ -43,13 +44,21 @@ function openSerialPort(com, view) {
         view.webContents.send('serial-data', { type: 'com-port-open', flag: 'success', msg: '串口已打开' });
     });
 
-    // 监听串口数据
-    port.on('data', data => {
+    const parser = port.pipe(new InterByteTimeoutParser({ interval: 30 }))
+    parser.on('data', data => {
         const data_info = Array.from(data) + `(${Array.from(data).map(num => num.toString(16).padStart(2, '0').toUpperCase()).join(' ')})`
         printLog(`[串口接收]${data_info}`);
         //logs && console.log('接收到的数据字节:', Array.from(data));  // 打印接收到的字节数据
         view.webContents.send('serial-message', Array.from(data)); // 发送到界面
     });
+
+    // 监听串口数据
+    /* port.on('data', data => {
+        const data_info = Array.from(data) + `(${Array.from(data).map(num => num.toString(16).padStart(2, '0').toUpperCase()).join(' ')})`
+        printLog(`[串口接收]${data_info}`);
+        //logs && console.log('接收到的数据字节:', Array.from(data));  // 打印接收到的字节数据
+        view.webContents.send('serial-message', Array.from(data)); // 发送到界面
+    }); */
 
     port.on('close', () => {
         printLog(`[串口断开]串口已断开连接`);

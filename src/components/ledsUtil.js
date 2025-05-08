@@ -173,15 +173,6 @@ export function getEditBaseSettingData(setting) {
 
 //获取 //led显示内容发送 数据帧
 export function getLedContendSendData(setting) {
-    // if (typeof ph !== 'number' || ph < 0 || ph > 255) {
-    //     throw new Error("屏号(ph)必须是0~255之间的数字");
-    // }
-    // if (typeof cmd !== 'string' || cmd.length !== 1) {
-    //     throw new Error("cmd必须是一个单字符字符串");
-    // }
-    // if (typeof text !== 'string' || text.length === 0) {
-    //     throw new Error("文本内容不能为空");
-    // }
     const {
         ph = 255,
         encodeArray,
