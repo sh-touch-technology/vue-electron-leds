@@ -69,7 +69,7 @@ function getLinuxUsername() {
         return '';
       }
     }
-    return 'test user';
+    return '';
   }
 
 module.exports = { initLog, printLog, convertStringToGbkCodeArray, getLinuxUsername };
