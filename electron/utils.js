@@ -2,6 +2,7 @@ const { app } = require('electron')
 const log = require('electron-log/main');
 const path = require('path');
 const iconv = require('iconv-lite');
+const os = require('os');
 
 //日志目录
 const logFilePath = path.resolve(app.getPath('home'), '首环日志\\条屏设置');
@@ -57,4 +58,18 @@ function convertStringToGbkCodeArray(inputString) {
     }
 }
 
-module.exports = { initLog, printLog, convertStringToGbkCodeArray };
+//获取linux用户名
+function getLinuxUsername() {
+    if (os.platform() === 'linux') {
+      try {
+        const userInfo = os.userInfo();
+        return userInfo.username || '';
+      } catch (err) {
+        console.error('获取用户名失败:', err);
+        return '';
+      }
+    }
+    return 'test user';
+  }
+
+module.exports = { initLog, printLog, convertStringToGbkCodeArray, getLinuxUsername };

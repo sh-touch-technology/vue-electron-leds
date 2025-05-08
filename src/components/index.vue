@@ -1069,8 +1069,8 @@ onMounted(() => {
                     if (obj.msg.includes('权限')) {
                         confirmRef.value.openError({
                             title: '提示',
-                            message: '权限不足，请在终端运行以下命令，将当前用户添加到dialout用户组',
-                            code: 'sudo usermod -aG dialout 用户名'
+                            message: '权限不足，请在终端运行以下命令，将当前用户添加到dialout用户组并重启计算机',
+                            code: true
                         })
                     }
                     break;

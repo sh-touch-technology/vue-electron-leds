@@ -27,6 +27,12 @@ contextBridge.exposeInMainWorld('electron', {
     //保存配置
     saveConfig: (data) => ipcRenderer.invoke('save-config-data', data),
 
+    //获取linux用户名
+    getLinuxUsername: () => ipcRenderer.invoke('get-linux-user'),
+
+    // 写入剪贴板
+    writeClipboard: (info) => ipcRenderer.invoke('write-clipboard', info),
+
     //获取串口列表
     getSerialPortList: () => ipcRenderer.send('serial-get-port-list'),
 

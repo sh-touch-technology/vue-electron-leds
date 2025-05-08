@@ -1,9 +1,9 @@
-const { app, BrowserWindow, ipcMain } = require('electron')
+const { app, BrowserWindow, ipcMain, clipboard } = require('electron')
 const { createMainWindowView, openDialog, openMainwindowDevTools,
     maximizeMainwindow, minimizeMainwindow, exitMainwindow, reloadMainwindow,
     getConfig, saveConfig, initStore, resetSetting } = require('./functions');
 const { openSerialPort, releaseSerialPort, sendSerialPortMessage, getSerialPortList } = require('./serial');
-const { printLog, initLog, convertStringToGbkCodeArray } = require('./utils');
+const { printLog, initLog, convertStringToGbkCodeArray, getLinuxUsername } = require('./utils');
 
 initStore();
 initLog();
@@ -26,6 +26,16 @@ function createWindow() {
     //渲染进程保存配置
     ipcMain.handle('save-config-data', (event, data) => {
         return saveConfig(data);
+    });
+
+    //渲染进程获取linux用户名
+    ipcMain.handle('get-linux-user', () => {
+        return getLinuxUsername();
+    });
+
+    //渲染进程写入剪贴板
+    ipcMain.handle('write-clipboard', (event, info) => {
+        clipboard.writeText(info);
     });
 
     //打开串口

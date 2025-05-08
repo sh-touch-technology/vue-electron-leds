@@ -4,7 +4,7 @@ const { InterByteTimeoutParser } = require('@serialport/parser-inter-byte-timeou
 const { printLog } = require('./utils');
 
 //是否打印调试日志
-const logs = true;
+const logs = false;
 
 //保存串口实例
 let port;
@@ -46,9 +46,8 @@ function openSerialPort(com, view) {
 
     const parser = port.pipe(new InterByteTimeoutParser({ interval: 30 }))
     parser.on('data', data => {
-        const data_info = Array.from(data) + `(${Array.from(data).map(num => num.toString(16).padStart(2, '0').toUpperCase()).join(' ')})`
-        printLog(`[串口接收]${data_info}`);
-        //logs && console.log('接收到的数据字节:', Array.from(data));  // 打印接收到的字节数据
+        const data_info = Array.from(data) + `十进制(${Array.from(data).map(num => num.toString(16).padStart(2, '0').toUpperCase()).join(' ')})`
+        logs && console.log('[串口接收]', Array.from(data));  // 打印接收到的字节数据
         view.webContents.send('serial-message', Array.from(data)); // 发送到界面
     });
 
