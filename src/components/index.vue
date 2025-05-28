@@ -1241,7 +1241,6 @@ onBeforeUnmount(() => {
                 display: flex;
                 flex-direction: row;
                 gap: 8px;
-                min-height: 150px;
                 margin-top: 18px;
 
                 .groupbox {
@@ -1273,7 +1272,6 @@ onBeforeUnmount(() => {
                 display: flex;
                 flex-direction: row;
                 gap: 8px;
-                min-height: 180px;
                 margin-top: 18px;
 
                 .groupbox {
@@ -1285,8 +1283,8 @@ onBeforeUnmount(() => {
                     display: flex;
                     flex-direction: column;
                     overflow-y: auto;
-                    max-height: 152px;
-                    min-height: 152px;
+                    max-height: 16vh;
+                    min-height: 16vh;
                     gap: 4px;
 
                     .log-item {

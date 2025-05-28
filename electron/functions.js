@@ -126,10 +126,10 @@ function exitMainwindow() {
 }
 
 const windowOptions = {
-    width: 1200,
-    height: 900,
-    minWidth: 1024,
-    minHeight: 900,
+    width: 1100,
+    height: 840,
+    minWidth: 1000,
+    minHeight: 840,
     frame: false, // 去掉窗口边框
     center: true,
     titleBarStyle: 'hidden', // 隐藏标题栏

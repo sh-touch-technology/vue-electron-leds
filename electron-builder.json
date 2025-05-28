@@ -35,5 +35,10 @@
             }
         ],
         "icon": "build/icons"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
     }
 }
