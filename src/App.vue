@@ -22,11 +22,20 @@ import { ref } from 'vue'
   height: 100%;
   display: flex;
   flex-direction: column;
+  /* zoom: 0.8; */
+  /* transform-origin: top left;
+  transform: scale(0.8); */
 }
 
 .toolbar {}
 
 .main {
   flex: 1;
+}
+</style>
+
+<style>
+.el-segmented__item-selected {
+    
 }
 </style>

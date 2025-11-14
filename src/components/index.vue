@@ -405,7 +405,7 @@
                         <!-- 信道设置 -->
                         <div class="groupbox" data-title="无线信道" style="flex:1;">
                             <div class="groupbox-content column">
-                                <el-select v-model="data.com_channel_selected" filterable style=""
+                                <!-- <el-select v-model="data.com_channel_selected" filterable style=""
                                     :popper-options="popper_options" placeholder="无线信道：">
                                     <el-option v-for="item in channelDefined" :key="item.channel"
                                         :label="`${item.label}(${item.channel})`" :value="item.channel">
@@ -417,12 +417,31 @@
                                             <p class="selected-title">信道选择：</p>
                                             <p class="selected-content">
                                                 {{
-                            `${channelDefined[data.com_channel_selected].label}(${data.com_channel_selected})`
-                        }}
+                                                    `${channelDefined[data.com_channel_selected].label}(${data.com_channel_selected})`
+                                                }}
                                             </p>
                                         </span>
                                     </template>
-                                </el-select>
+                                </el-select> -->
+                                <CustomerSelect v-model="data.com_channel_selected" :options="channelDefined"
+                                    labelKey="channel" itemKey="label" placeholder="无线信道：">
+                                    <!-- 自定义下拉选项 -->
+                                    <template #option="{ item }">
+                                        <span>{{ `${item.label}(${item.channel})` }}</span>
+                                    </template>
+
+                                    <!-- 选中后的显示内容 -->
+                                    <template #label="{ value }">
+                                        <span class="selector-selected" :style="computeSelectStyle(value)">
+                                            <p class="selected-title">信道选择：</p>
+                                            <p class="selected-content">
+                                                {{ channelDefined[value] ? `${channelDefined[value].label}(${value})` :
+                                                `未定义(${value})` }}
+                                            </p>
+                                        </span>
+                                    </template>
+                                </CustomerSelect>
+
                                 <div class="button-area wrap">
                                     <el-button type="primary" plain @click="editMainControl()"
                                         style="margin-top: auto;">主控修改</el-button>
@@ -502,7 +521,8 @@ import { onMounted, onBeforeUnmount, ref, nextTick, toRefs, computed } from 'vue
 import { channelDefined } from './channel';
 import { ConfigDataStore } from '@pinia/ConfigData.js';
 import * as ledsUtil from './ledsUtil.js';
-import ConfirmDialog from './ConfirmDialog.vue'
+import ConfirmDialog from './ConfirmDialog.vue';
+import CustomerSelect from '../utils/CustomerSelect.vue';
 
 const ConfigData = ConfigDataStore();
 //Popper.js配置
