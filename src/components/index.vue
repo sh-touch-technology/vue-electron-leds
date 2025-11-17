@@ -60,7 +60,7 @@
                     <div class="groupbox" data-title="基本设置" style="flex:1;">
                         <div class="groupbox-content column">
                             <!-- 修改屏号 -->
-                            <el-select v-model="data.screen_edit" filterable placeholder="修改屏号："
+                            <!-- <el-select v-model="data.screen_edit" filterable placeholder="修改屏号："
                                 style="min-width: 200px;flex: 1;" :popper-options="popper_options"
                                 :filter-method="handleScreenEditInput">
                                 <el-option v-for="screen in Array.from({ length: 255 }, (_, i) => i + 1)" :key="screen"
@@ -74,9 +74,24 @@
                                         <p class="selected-content">{{ data.screen_edit }}</p>
                                     </span>
                                 </template>
-                            </el-select>
+                            </el-select> -->
+                            <CustomerSelect v-model="data.screen_edit" :options="screenEditOptions" labelKey="label"
+                                itemKey="screen" placeholder="修改屏号：" >
+                                <!-- 下拉选项 -->
+                                <template #option="{ item }">
+                                    <span>{{ item.label }}</span>
+                                </template>
+
+                                <!-- 选中后显示 -->
+                                <template #label="{ value }">
+                                    <span class="selector-selected" :style="computeSelectStyle(value)">
+                                        <p class="selected-title">修改屏号：</p>
+                                        <p class="selected-content">{{ value }}</p>
+                                    </span>
+                                </template>
+                            </CustomerSelect>
                             <!-- 行数 -->
-                            <el-select v-model="data.line_num" filterable style="flex: 1;"
+                            <!-- <el-select v-model="data.line_num" filterable style="flex: 1;"
                                 :popper-options="popper_options" :filter-method="handleLineNumInput" placeholder="行数："
                                 v-if="data.device_type !== 3">
                                 <el-option
@@ -91,9 +106,24 @@
                                         <p class="selected-content">{{ data.line_num }}</p>
                                     </span>
                                 </template>
-                            </el-select>
+                            </el-select> -->
+                            <CustomerSelect v-model="data.line_num" :options="lineNumOptions" labelKey="label"
+                                itemKey="screen" placeholder="行数：" v-if="data.device_type !== 3">
+                                <!-- 下拉选项 -->
+                                <template #option="{ item }">
+                                    <span>{{ item.label }}</span>
+                                </template>
+
+                                <!-- 选中后显示 -->
+                                <template #label="{ value }">
+                                    <span class="selector-selected" :style="computeSelectStyle(value)">
+                                        <p class="selected-title">行数：</p>
+                                        <p class="selected-content">{{ value }}</p>
+                                    </span>
+                                </template>
+                            </CustomerSelect>
                             <!-- 每行汉字数 -->
-                            <el-select v-model="data.line_text_num" filterable style="flex: 1;"
+                            <!-- <el-select v-model="data.line_text_num" filterable style="flex: 1;"
                                 :popper-options="popper_options" :filter-method="handleLineTextNumInput"
                                 placeholder="每行汉字数：" v-if="data.device_type !== 3">
                                 <el-option v-for="item in Array.from({ length: 33 }, (_, i) => i)" :key="item"
@@ -106,7 +136,22 @@
                                         <p class="selected-content">{{ data.line_text_num }}</p>
                                     </span>
                                 </template>
-                            </el-select>
+                            </el-select> -->
+                            <CustomerSelect v-model="data.line_text_num" :options="lineTextNumOptions" labelKey="label"
+                                itemKey="screen" placeholder="每行汉字数：" v-if="data.device_type !== 3">
+                                <!-- 下拉选项 -->
+                                <template #option="{ item }">
+                                    <span>{{ item.label }}</span>
+                                </template>
+
+                                <!-- 选中后显示 -->
+                                <template #label="{ value }">
+                                    <span class="selector-selected" :style="computeSelectStyle(value)">
+                                        <p class="selected-title">每行汉字数：</p>
+                                        <p class="selected-content">{{ value }}</p>
+                                    </span>
+                                </template>
+                            </CustomerSelect>
                             <!-- 数据正反向 -->
                             <el-select v-model="data.data_forward_or_reverse_direction" style="flex: 1;"
                                 :popper-options="popper_options" placeholder="数据正反向："
@@ -334,7 +379,7 @@
                                 </template>
                             </el-select>
                             <!-- 闪烁次数 -->
-                            <el-select v-model="data.flashes_num" filterable :popper-options="popper_options"
+                            <!-- <el-select v-model="data.flashes_num" filterable :popper-options="popper_options"
                                 :filter-method="handleFlashsNumInput" placeholder="闪烁次数：" v-if="data.device_type !== 3">
                                 <el-option v-for="item in Array.from({ length: 10 }, (_, i) => i)" :key="item"
                                     :label="item" :value="item">
@@ -346,7 +391,22 @@
                                         <p class="selected-content">{{ data.flashes_num }}</p>
                                     </span>
                                 </template>
-                            </el-select>
+                            </el-select> -->
+                            <CustomerSelect v-model="data.flashes_num" :options="flashesOptions" labelKey="label"
+                                itemKey="screen" placeholder="闪烁次数：" v-if="data.device_type !== 3">
+                                <!-- 下拉选项 -->
+                                <template #option="{ item }">
+                                    <span>{{ item.label }}</span>
+                                </template>
+
+                                <!-- 选中后显示 -->
+                                <template #label="{ value }">
+                                    <span class="selector-selected" :style="computeSelectStyle(value)">
+                                        <p class="selected-title">闪烁次数：</p>
+                                        <p class="selected-content">{{ value }}</p>
+                                    </span>
+                                </template>
+                            </CustomerSelect>
                             <!-- 对齐方式 -->
                             <el-select v-model="data.align_type" :popper-options="popper_options" disabled
                                 v-if="data.device_type !== 3">
@@ -361,19 +421,21 @@
                                 </template>
                             </el-select>
                             <!-- 喇叭音量 -->
-                            <el-select v-model="data.volume" filterable :popper-options="popper_options"
-                                :filter-method="handleVolumeInput" placeholder="喇叭音量：" v-if="data.device_type === 3">
-                                <el-option v-for="item in Array.from({ length: 16 }, (_, i) => i + 1)" :key="item"
-                                    :label="item" :value="item">
-                                    <span style="">{{ item }}</span>
-                                </el-option>
-                                <template #label>
-                                    <span class="selector-selected" :style="computeSelectStyle(data.volume)">
+                            <CustomerSelect v-model="data.volume" :options="volumeOptions" labelKey="label"
+                                itemKey="screen" placeholder="喇叭音量：" v-if="data.device_type === 3">
+                                <!-- 下拉选项 -->
+                                <template #option="{ item }">
+                                    <span>{{ item.label }}</span>
+                                </template>
+
+                                <!-- 选中后显示 -->
+                                <template #label="{ value }">
+                                    <span class="selector-selected" :style="computeSelectStyle(value)">
                                         <p class="selected-title">喇叭音量：</p>
-                                        <p class="selected-content">{{ data.volume }}</p>
+                                        <p class="selected-content">{{ value }}</p>
                                     </span>
                                 </template>
-                            </el-select>
+                            </CustomerSelect>
                             <el-button type="primary" plain @click="editExtensionSetting" style="margin-top: auto;"
                                 v-if="data.device_type !== 3">扩展设置</el-button>
                             <el-button type="primary" plain @click="settingVolume" style="margin-top: auto;"
@@ -384,45 +446,26 @@
                         <!-- 屏号选择 -->
                         <div class="groupbox" data-title="选择屏号">
                             <div class="groupbox-content row">
-                                <el-select v-model="data.screen_selected" filterable placeholder="当前屏号："
-                                    style="min-width: 150px;flex: 1;" :popper-options="popper_options"
-                                    :filter-method="handleScreenSelectInput">
-                                    <el-option v-for="screen in Array.from({ length: 256 }, (_, i) => i)" :key="screen"
-                                        :label="screen" :value="screen"
-                                        style="display: flex;flex-direction: row;justify-content: space-between;">
-                                        <span style="">{{ screen }}</span>
-                                    </el-option>
-                                    <template #label>
-                                        <span class="selector-selected"
-                                            :style="computeSelectStyle(data.screen_selected)">
+                                <CustomerSelect v-model="data.screen_selected" :options="screenOptions" labelKey="label"
+                                    itemKey="screen" placeholder="当前屏号：">
+                                    <!-- 下拉选项 -->
+                                    <template #option="{ item }">
+                                        <span>{{ item.label }}</span>
+                                    </template>
+
+                                    <!-- 选中后显示 -->
+                                    <template #label="{ value }">
+                                        <span class="selector-selected" :style="computeSelectStyle(value)">
                                             <p class="selected-title">当前屏号：</p>
-                                            <p class="selected-content">{{ data.screen_selected }}</p>
+                                            <p class="selected-content">{{ value }}</p>
                                         </span>
                                     </template>
-                                </el-select>
+                                </CustomerSelect>
                             </div>
                         </div>
                         <!-- 信道设置 -->
                         <div class="groupbox" data-title="无线信道" style="flex:1;">
                             <div class="groupbox-content column">
-                                <!-- <el-select v-model="data.com_channel_selected" filterable style=""
-                                    :popper-options="popper_options" placeholder="无线信道：">
-                                    <el-option v-for="item in channelDefined" :key="item.channel"
-                                        :label="`${item.label}(${item.channel})`" :value="item.channel">
-                                        <span style="float: left">{{ `${item.label}(${item.channel})` }}</span>
-                                    </el-option>
-                                    <template #label>
-                                        <span class="selector-selected"
-                                            :style="computeSelectStyle(data.com_channel_selected)">
-                                            <p class="selected-title">信道选择：</p>
-                                            <p class="selected-content">
-                                                {{
-                                                    `${channelDefined[data.com_channel_selected].label}(${data.com_channel_selected})`
-                                                }}
-                                            </p>
-                                        </span>
-                                    </template>
-                                </el-select> -->
                                 <CustomerSelect v-model="data.com_channel_selected" :options="channelDefined"
                                     labelKey="channel" itemKey="label" placeholder="无线信道：">
                                     <!-- 自定义下拉选项 -->
@@ -436,7 +479,7 @@
                                             <p class="selected-title">信道选择：</p>
                                             <p class="selected-content">
                                                 {{ channelDefined[value] ? `${channelDefined[value].label}(${value})` :
-                                                `未定义(${value})` }}
+                                                    `未定义(${value})` }}
                                             </p>
                                         </span>
                                     </template>
@@ -518,6 +561,7 @@
 
 <script setup>
 import { onMounted, onBeforeUnmount, ref, nextTick, toRefs, computed } from 'vue';
+import { storeToRefs } from "pinia";
 import { channelDefined } from './channel';
 import { ConfigDataStore } from '@pinia/ConfigData.js';
 import * as ledsUtil from './ledsUtil.js';
@@ -548,10 +592,69 @@ const show_log_list = computed(() => {
 })
 
 //设置数据
-const { config: data } = toRefs(ConfigData);
+const { config: data } = storeToRefs(ConfigData);
 
 //主控返回数据超时计时器
 const mainControlDataReturnTimer = ref(null);
+
+//屏号定义
+const screenOptions = Array.from({ length: 256 }, (_, i) => ({
+    screen: i,
+    label: i
+}));
+
+//修改屏号定义
+const screenEditOptions = Array.from({ length: 255 }, (_, i) => ({
+    screen: i + 1,
+    label: i + 1
+}));
+
+//音量定义
+const volumeOptions = Array.from({ length: 16 }, (_, i) => ({
+    screen: i + 1,
+    label: i + 1
+}));
+
+//闪烁次数定义
+const flashesOptions = Array.from({ length: 10 }, (_, i) => ({
+    screen: i,
+    label: i
+}));
+
+//每行汉字数定义
+const lineTextNumOptions = Array.from({ length: 33 }, (_, i) => ({
+    screen: i,
+    label: i
+}));
+
+//行数定义
+// const lineNumOptions = computed(() => {
+//     if (data.device_type === 2) {
+//         return Array.from({ length: 12 }, (_, i) => ({
+//             screen: i + 1,
+//             label: i + 1
+//         }));
+//     }
+//     return [{
+//         screen: 1,
+//         label: 1
+//     },
+//     {
+//         screen: 2,
+//         label: 2
+//     }]
+// })
+
+const lineNumOptions = computed(() => {
+    if (data.value.device_type === 2) {
+        return Array.from({ length: 12 }, (_, i) => ({
+            value: i + 1,
+            label: i + 1
+        }));
+    } else {
+        return [1, 2].map(n => ({ value: n, label: n }));
+    }
+});
 
 //日志函数
 let log_id = 0;

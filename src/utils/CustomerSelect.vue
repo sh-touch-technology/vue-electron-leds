@@ -70,12 +70,34 @@ const handleChange = (val) => {
 };
 
 // blur
+// const handleBlur = () => {
+//     console.log('inputKeyword.value',inputKeyword.value);
+//     if (!hasSelected && inputKeyword.value) {
+//         emits('update:modelValue', inputKeyword.value);
+//         emits('change', inputKeyword.value);
+//     }
+//     hasSelected = false;
+// };
+
 const handleBlur = () => {
-    console.log('inputKeyword.value',inputKeyword.value);
     if (!hasSelected && inputKeyword.value) {
-        emits('update:modelValue', inputKeyword.value);
-        emits('change', inputKeyword.value);
+
+        // 根据 labelKey 找对应的 option
+        const match = props.options.find(
+            (item) => String(item[props.labelKey]) === String(inputKeyword.value)
+        );
+
+        if (match) {
+            // 自动成为真实选项的 value
+            emits('update:modelValue', match[props.labelKey]);
+            emits('change', match[props.labelKey]);
+        } else {
+            // 输入不存在，正常按原逻辑处理
+            emits('update:modelValue', inputKeyword.value);
+            emits('change', inputKeyword.value);
+        }
     }
+
     hasSelected = false;
 };
 </script>
