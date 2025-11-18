@@ -1,5 +1,5 @@
 <template>
-  <div class="conatiner">
+  <div class="conatiner" :style="{ zoom: scale }">
     <div class="toolbar">
       <toolbar />
     </div>
@@ -13,7 +13,13 @@
 
 <script setup>
 import toolbar from './components/toolbar.vue';
-import { ref } from 'vue'
+import { ref } from 'vue';
+
+const scale = ref(1)
+
+window.electron.getCurrentScale().then(v => {
+  scale.value = v
+})
 </script>
 
 <style scoped>
@@ -31,11 +37,10 @@ import { ref } from 'vue'
 
 .main {
   flex: 1;
+  overflow: auto;
 }
 </style>
 
 <style>
-.el-segmented__item-selected {
-    
-}
+.el-segmented__item-selected {}
 </style>

@@ -21,6 +21,9 @@ contextBridge.exposeInMainWorld('electron', {
         return () => ipcRenderer.removeListener('serial-message', listener); // 返回移除方法
     },
 
+    //获取缩放配置
+    getCurrentScale: () => ipcRenderer.invoke('get-current-scale'),
+
     //获取配置数据
     getConfigData: () => ipcRenderer.invoke('get-config-data'),
 

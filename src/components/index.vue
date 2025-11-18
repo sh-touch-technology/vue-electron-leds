@@ -76,7 +76,7 @@
                                 </template>
                             </el-select> -->
                             <CustomerSelect v-model="data.screen_edit" :options="screenEditOptions" labelKey="label"
-                                itemKey="screen" placeholder="修改屏号：" >
+                                itemKey="screen" placeholder="修改屏号：" :value-range="[1, 255]" value-name="屏号" @log="log">
                                 <!-- 下拉选项 -->
                                 <template #option="{ item }">
                                     <span>{{ item.label }}</span>
@@ -108,7 +108,8 @@
                                 </template>
                             </el-select> -->
                             <CustomerSelect v-model="data.line_num" :options="lineNumOptions" labelKey="label"
-                                itemKey="screen" placeholder="行数：" v-if="data.device_type !== 3">
+                                itemKey="screen" placeholder="行数：" v-if="data.device_type !== 3" :value-range="[1, 2]"
+                                value-name="行数" @log="log">
                                 <!-- 下拉选项 -->
                                 <template #option="{ item }">
                                     <span>{{ item.label }}</span>
@@ -138,7 +139,8 @@
                                 </template>
                             </el-select> -->
                             <CustomerSelect v-model="data.line_text_num" :options="lineTextNumOptions" labelKey="label"
-                                itemKey="screen" placeholder="每行汉字数：" v-if="data.device_type !== 3">
+                                itemKey="screen" placeholder="每行汉字数：" v-if="data.device_type !== 3"
+                                :value-range="[0, 32]" value-name="每行汉字数" @log="log">
                                 <!-- 下拉选项 -->
                                 <template #option="{ item }">
                                     <span>{{ item.label }}</span>
@@ -393,7 +395,8 @@
                                 </template>
                             </el-select> -->
                             <CustomerSelect v-model="data.flashes_num" :options="flashesOptions" labelKey="label"
-                                itemKey="screen" placeholder="闪烁次数：" v-if="data.device_type !== 3">
+                                itemKey="screen" placeholder="闪烁次数：" v-if="data.device_type !== 3" :value-range="[0, 9]"
+                                value-name="闪烁次数" @log="log">
                                 <!-- 下拉选项 -->
                                 <template #option="{ item }">
                                     <span>{{ item.label }}</span>
@@ -422,7 +425,8 @@
                             </el-select>
                             <!-- 喇叭音量 -->
                             <CustomerSelect v-model="data.volume" :options="volumeOptions" labelKey="label"
-                                itemKey="screen" placeholder="喇叭音量：" v-if="data.device_type === 3">
+                                itemKey="screen" placeholder="喇叭音量：" v-if="data.device_type === 3"
+                                :value-range="[1, 16]" value-name="喇叭音量" @log="log">
                                 <!-- 下拉选项 -->
                                 <template #option="{ item }">
                                     <span>{{ item.label }}</span>
@@ -447,7 +451,8 @@
                         <div class="groupbox" data-title="选择屏号">
                             <div class="groupbox-content row">
                                 <CustomerSelect v-model="data.screen_selected" :options="screenOptions" labelKey="label"
-                                    itemKey="screen" placeholder="当前屏号：">
+                                    itemKey="screen" placeholder="当前屏号：" :value-range="[0, 255]" value-name="屏号选择"
+                                    @log="log">
                                     <!-- 下拉选项 -->
                                     <template #option="{ item }">
                                         <span>{{ item.label }}</span>
@@ -467,7 +472,8 @@
                         <div class="groupbox" data-title="无线信道" style="flex:1;">
                             <div class="groupbox-content column">
                                 <CustomerSelect v-model="data.com_channel_selected" :options="channelDefined"
-                                    labelKey="channel" itemKey="label" placeholder="无线信道：">
+                                    labelKey="channel" itemKey="label" placeholder="无线信道：" :value-range="[0, 63]"
+                                    value-name="无线信道" @log="log">
                                     <!-- 自定义下拉选项 -->
                                     <template #option="{ item }">
                                         <span>{{ `${item.label}(${item.channel})` }}</span>
@@ -534,12 +540,11 @@
                 </div>
                 <div class="log">
                     <!-- 日志 -->
-                    <div class="groupbox" data-title="日志" style="flex:1;">
+                    <div class="groupbox" style="flex:1;">
+                        <!-- <el-segmented v-model="log_debug"
+                            :options="[{ label: '普通', value: false }, { label: '调试', value: true }]"
+                            style="position: absolute;right: 17px;top: 12px;" size="small" @change="logLevelChange" /> -->
                         <div class="log-list" id="logContainer">
-                            <el-segmented v-model="log_debug"
-                                :options="[{ label: '普通', value: false }, { label: '调试', value: true }]"
-                                style="position: absolute;right: 17px;top: 12px;" size="small"
-                                @change="logLevelChange" />
                             <div class="log-item" v-for="item in show_log_list" :key="item.id"
                                 :style="computeLogColor(item.level)">
                                 <p>{{ item.time }} - {{ item.msg }}</p>
@@ -547,6 +552,7 @@
                         </div>
                     </div>
                     <div class="control-panel">
+                        <el-button :type="log_debug?'warning':'primary'" plain style="flex: 1;" @click="log_debug = !log_debug">{{log_debug ?'普通日志':'调试日志'}}</el-button>
                         <el-button type="primary" plain style="flex: 1;" @click="log_list.length = 0">清空日志</el-button>
                         <el-button type="primary" plain style="flex: 1;" @click="resetSetting">重置设置</el-button>
                         <el-button type="primary" plain style="flex: 1;" @click="appRelaunch">程序重启</el-button>
@@ -1329,8 +1335,10 @@ onBeforeUnmount(() => {
         .main {
             flex: 1;
             padding: 16px 0 0 0;
-            display: flex;
-            flex-direction: column;
+            // display: flex;
+            // flex-direction: column;
+            display: grid;
+            grid-template-rows: auto auto auto 1fr;
 
             .setting {
                 flex: 1;
@@ -1395,19 +1403,22 @@ onBeforeUnmount(() => {
                 display: flex;
                 flex-direction: row;
                 gap: 8px;
-                margin-top: 18px;
+                margin-top: 12px;
+                overflow: hidden;
 
                 .groupbox {
-                    padding-top: 12px;
+                    padding-top: 6px;
                     padding-right: 5px;
+                    overflow: auto;
+                    display: grid;
                 }
 
                 .log-list {
                     display: flex;
                     flex-direction: column;
-                    overflow-y: auto;
-                    max-height: 16vh;
-                    min-height: 16vh;
+                    overflow: auto;
+                    // max-height: 16vh;
+                    // min-height: 16vh;
                     gap: 4px;
 
                     .log-item {

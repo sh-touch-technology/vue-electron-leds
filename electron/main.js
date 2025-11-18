@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain, clipboard } = require('electron')
 const { createMainWindowView, openDialog, openMainwindowDevTools,
     maximizeMainwindow, minimizeMainwindow, exitMainwindow, reloadMainwindow,
-    getConfig, saveConfig, initStore, resetSetting } = require('./functions');
+    getConfig, saveConfig, initStore, resetSetting, getCurrentScale } = require('./functions');
 const { openSerialPort, releaseSerialPort, sendSerialPortMessage, getSerialPortList } = require('./serial');
 const { printLog, initLog, convertStringToGbkCodeArray, getLinuxUsername } = require('./utils');
 
@@ -17,6 +17,11 @@ function createWindow() {
 
     //创建浏览器窗口
     mainWindow = createMainWindowView();
+
+    //获取缩放配置
+    ipcMain.handle('get-current-scale', () => {
+        return getCurrentScale();
+    });
 
     //渲染进程获取配置信息
     ipcMain.handle('get-config-data', () => {
@@ -132,3 +137,32 @@ app.on('window-all-closed', function () {
     //if (process.platform !== 'darwin') app.quit()
     app.quit()
 })
+
+// 限制一个窗口
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  // 销毁所有窗口、托盘、退出应用
+  app.exit();
+}
+
+//当运行第二个实例时
+app.on("second-instance", () => {
+  try {
+    if (mainWindow) {
+      //窗口已销毁 重新创建窗口
+      if (mainWindow.isDestroyed()) {
+        createWindow();
+        return;
+      }
+      //窗口最小化 恢复到以前的状态
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+      //窗口正常 聚焦窗口
+      mainWindow.focus();
+    }
+  }
+  catch (err) {
+    createWindow();
+  }
+});

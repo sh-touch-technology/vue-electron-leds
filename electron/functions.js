@@ -1,4 +1,4 @@
-const { app, BrowserWindow, BrowserView, Menu, dialog, session } = require('electron');
+const { app, BrowserWindow, BrowserView, Menu, dialog, session, screen } = require('electron');
 const path = require('path');
 const Store = require('electron-store');
 const { printLog } = require('./utils');
@@ -125,30 +125,69 @@ function exitMainwindow() {
     app.quit();
 }
 
-const windowOptions = {
-    width: 1100,
-    height: 840,
-    minWidth: 1000,
-    minHeight: 840,
-    frame: false, // 去掉窗口边框
-    center: true,
-    titleBarStyle: 'hidden', // 隐藏标题栏
-    icon: path.join(__dirname, 'build','icons','icon.png'),
-    webPreferences: {
-        preload: path.join(__dirname, '/preload.js'),
-        //渲染进程配置
-        nodeIntegration: false, //可以引入node和electron相关的API
-        contextIsolation: true, //可以使用require方法
-        enableRemoteModule: false, //可以使用remote方法
-    },
+const scalingRules = [
+    { width: 3840, height: 2160, scale: 1.5 },   // 4K
+    { width: 2560, height: 1440, scale: 1.25 },  // 2K
+    { width: 1920, height: 1080, scale: 1.0 },   // 1080P
+    { width: 1600, height: 900, scale: 0.9 },
+    { width: 1366, height: 768, scale: 0.8 },
+    { width: 1024, height: 768, scale: 0.8 },
+    { width: 800, height: 600, scale: 0.65 },
+]
+
+// 获取当前缩放比函数（函数3）
+function getCurrentScale() {
+    const { width, height } = screen.getPrimaryDisplay().workAreaSize
+
+    // 按规则匹配
+    for (const rule of scalingRules) {
+        if (rule.width <= width && rule.height <= height) {
+            return rule.scale
+        }
+    }
+
+    // 默认缩放比
+    return 1.0
+}
+
+// 根据分辨率 + 缩放比 返回程序宽度（函数1）
+function getProgramWidth(baseWidth = 1100) {
+    const scale = getCurrentScale()
+    return Math.round(baseWidth * scale)
+}
+
+// 返回程序高度（函数2）
+function getProgramHeight(baseHeight = 840) {
+    const scale = getCurrentScale()
+    return Math.round(baseHeight * scale)
+}
+
+function getWindowOptions() {
+    return {
+        width: getProgramWidth(1100),
+        height: getProgramHeight(840),
+        minWidth: getProgramWidth(1000),
+        minHeight: getProgramHeight(840),
+        frame: false, // 去掉窗口边框
+        center: true,
+        titleBarStyle: 'hidden', // 隐藏标题栏
+        icon: path.join(__dirname, 'build', 'icons', 'icon.png'),
+        webPreferences: {
+            preload: path.join(__dirname, '/preload.js'),
+            //渲染进程配置
+            nodeIntegration: false, //可以引入node和electron相关的API
+            contextIsolation: true, //可以使用require方法
+            enableRemoteModule: false, //可以使用remote方法
+        },
+    }
 }
 
 /**
  * @description: 加载等待页面，解决主窗口白屏问题
- * @param {Object} windowOptions 主窗口配置
  * @return {Void}
  */
-function loadingView(windowOptions) {
+function loadingView() {
+    const windowOptions = getWindowOptions();
     const loadingBrowserView = new BrowserView();
     mainWindow.setBrowserView(loadingBrowserView);
     loadingBrowserView.setBounds({
@@ -173,7 +212,7 @@ function loadingView(windowOptions) {
 
 
 function createMainWindowView() {
-
+    const windowOptions = getWindowOptions();
     mainWindow = new BrowserWindow(windowOptions);
 
     // 添加加载页面 解决白屏的问题
@@ -209,5 +248,5 @@ function createMainWindowView() {
 module.exports = {
     createMainWindowView, openDialog, openMainwindowDevTools,
     maximizeMainwindow, minimizeMainwindow, exitMainwindow, reloadMainwindow,
-    saveConfig, getConfig, initStore, resetSetting
+    saveConfig, getConfig, initStore, resetSetting, getCurrentScale
 };

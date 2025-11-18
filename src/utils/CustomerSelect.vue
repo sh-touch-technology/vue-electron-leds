@@ -1,24 +1,28 @@
 <template>
-    <el-select v-model="innerValue" filterable clearable default-first-option :placeholder="placeholder"
-        style="width: 100%;" :filter-method="handleInput" @blur="handleBlur" @change="handleChange">
-        <!-- 支持自定义 option 渲染 -->
-        <el-option v-for="item in filteredData" :key="itemKey ? item[itemKey] : item[labelKey]" :label="item[labelKey]"
-            :value="item[labelKey]">
-            <!--
-        #option 插槽
-        参数:
-          item: 当前选项对象
-      -->
+    <el-select
+        v-model="innerValue"
+        filterable
+        clearable
+        default-first-option
+        :placeholder="placeholder"
+        style="width: 100%;"
+        :filter-method="handleInput"
+        @blur="handleBlur"
+        @change="handleChange"
+    >
+        <el-option
+            v-for="item in filteredData"
+            :key="itemKey ? item[itemKey] : item[labelKey]"
+            :label="item[labelKey]"
+            :value="item[labelKey]"
+        >
             <slot name="option" :item="item">
-                <!-- 默认显示 -->
                 {{ item[labelKey] }}
             </slot>
         </el-option>
 
-        <!-- 支持自定义 label（选中内容） -->
         <template #label="{ value }">
             <slot name="label" :value="value">
-                <!-- 默认显示 -->
                 {{ value }}
             </slot>
         </template>
@@ -33,10 +37,16 @@ const props = defineProps({
     modelValue: { type: [String, Number], default: '' },
     labelKey: { type: String, default: 'label' },
     itemKey: { type: String, default: '' },
-    placeholder: { type: String, default: '请选择或输入内容' }
+    placeholder: { type: String, default: '请选择或输入内容' },
+
+    // ⭐ 新增：数值取值范围，例如 [1, 100]
+    valueRange: { type: Array, default: () => null },
+
+    // ⭐ 新增：属性名称，例如 device_type
+    valueName: { type: String, default: '' }
 });
 
-const emits = defineEmits(['update:modelValue', 'change']);
+const emits = defineEmits(['update:modelValue', 'change', 'log']);
 
 const innerValue = ref(props.modelValue);
 const filteredData = ref([...props.options]);
@@ -57,7 +67,8 @@ const handleInput = (val) => {
     } else {
         const keyword = val.toLowerCase();
         filteredData.value = props.options.filter((item) =>
-            String(item[props.labelKey] ?? '').toLowerCase().includes(keyword) || String(item[props.itemKey] ?? '').toLowerCase().includes(keyword)
+            String(item[props.labelKey] ?? '').toLowerCase().includes(keyword) ||
+            String(item[props.itemKey] ?? '').toLowerCase().includes(keyword)
         );
     }
 };
@@ -70,31 +81,42 @@ const handleChange = (val) => {
 };
 
 // blur
-// const handleBlur = () => {
-//     console.log('inputKeyword.value',inputKeyword.value);
-//     if (!hasSelected && inputKeyword.value) {
-//         emits('update:modelValue', inputKeyword.value);
-//         emits('change', inputKeyword.value);
-//     }
-//     hasSelected = false;
-// };
-
 const handleBlur = () => {
     if (!hasSelected && inputKeyword.value) {
+        const value = inputKeyword.value;
 
-        // 根据 labelKey 找对应的 option
+        // -------------------------------
+        // ⭐⭐ 数值范围校验
+        // -------------------------------
+        if (props.valueRange && props.valueRange.length === 2) {
+            const [min, max] = props.valueRange;
+            const numberVal = Number(value);
+
+            // 输入不是数字 或 不在范围内 → 不更新值 + 调用 log
+            if (isNaN(numberVal) || numberVal < min || numberVal > max) {
+                emits(
+                    'log',
+                    `输入数值不正确，${props.valueName}取值范围${min}-${max}`,
+                    'warning'
+                );
+                hasSelected = false;
+                return;
+            }
+        }
+
+        // -------------------------------
+        // 正常处理：匹配 option
+        // -------------------------------
         const match = props.options.find(
-            (item) => String(item[props.labelKey]) === String(inputKeyword.value)
+            (item) => String(item[props.labelKey]) === String(value)
         );
 
         if (match) {
-            // 自动成为真实选项的 value
             emits('update:modelValue', match[props.labelKey]);
             emits('change', match[props.labelKey]);
         } else {
-            // 输入不存在，正常按原逻辑处理
-            emits('update:modelValue', inputKeyword.value);
-            emits('change', inputKeyword.value);
+            emits('update:modelValue', value);
+            emits('change', value);
         }
     }
 
